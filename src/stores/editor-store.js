@@ -105,6 +105,34 @@ export const useEditorStore = defineStore('editor', {
       this.redoStack = []
       return id
     },
+    addOpacityAnimation(targetId, { from = 1, to = 0.5, dur = '1s', begin = '0s', fill = 'freeze' } = {}) {
+      const before = this.xml
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const target = doc.getElementById(targetId)
+      if (!target) return null
+      // Avoid adding an identical duplicate
+      const existing = Array.from(target.children).find(c => (c.tagName || '').toLowerCase() === 'animate' &&
+        c.getAttribute('attributeName') === 'opacity' &&
+        c.getAttribute('from') === String(from) &&
+        c.getAttribute('to') === String(to) &&
+        c.getAttribute('dur') === String(dur) &&
+        c.getAttribute('begin') === String(begin) &&
+        c.getAttribute('fill') === String(fill)
+      )
+      if (existing) return existing
+      const anim = doc.createElement('animate')
+      anim.setAttribute('attributeName', 'opacity')
+      anim.setAttribute('from', String(from))
+      anim.setAttribute('to', String(to))
+      anim.setAttribute('dur', String(dur))
+      anim.setAttribute('begin', String(begin))
+      anim.setAttribute('fill', String(fill))
+      target.appendChild(anim)
+      this.xml = new XMLSerializer().serializeToString(doc.documentElement)
+      this.undoStack.push(before)
+      this.redoStack = []
+      return anim
+    },
     clearSelection() {
       this.selectedId = null
     },
@@ -300,6 +328,71 @@ export const useEditorStore = defineStore('editor', {
     },
     exportXml(pretty = false) {
       return exportSvg(this.xml, { pretty })
+    },
+    // M6: SMIL parse/list/update (animate only for MVP)
+    _ensureElementIds(doc) {
+      let changed = false
+      const svg = doc.documentElement
+      for (const el of Array.from(svg.children)) {
+        if (!el.getAttribute) continue
+        if (!el.getAttribute('id')) {
+          const id = this._genId(el.tagName.toLowerCase())
+          el.setAttribute('id', id)
+          changed = true
+        }
+      }
+      return changed
+    },
+    listAnimations(filterTargetId = null) {
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const changed = this._ensureElementIds(doc)
+      if (changed) {
+        this.xml = new XMLSerializer().serializeToString(doc.documentElement)
+      }
+      const svg = doc.documentElement
+      const all = []
+      for (const el of Array.from(svg.children)) {
+        const targetId = el.getAttribute && el.getAttribute('id')
+        if (!targetId) continue
+        if (filterTargetId && targetId !== filterTargetId) continue
+  const anims = Array.from(el.children).filter(c => (c.tagName || '').toLowerCase() === 'animate')
+        anims.forEach((animEl, idx) => {
+          const entry = {
+            kind: 'animate',
+            animIndex: idx,
+            targetId,
+            attributeName: animEl.getAttribute('attributeName') || '',
+            begin: animEl.getAttribute('begin') || '',
+            dur: animEl.getAttribute('dur') || '',
+            from: animEl.getAttribute('from') || '',
+            to: animEl.getAttribute('to') || '',
+            values: animEl.getAttribute('values') || '',
+            keyTimes: animEl.getAttribute('keyTimes') || '',
+            repeatCount: animEl.getAttribute('repeatCount') || '',
+            fill: animEl.getAttribute('fill') || '',
+          }
+          all.push(entry)
+        })
+      }
+      return all
+    },
+    updateAnimation(ref, props = {}) {
+      // ref: { targetId, animIndex, kind: 'animate' }
+      if (!ref || !ref.targetId) return
+      const before = this.xml
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const target = doc.getElementById(ref.targetId)
+      if (!target) return
+  const list = Array.from(target.children).filter(c => (c.tagName || '').toLowerCase() === 'animate')
+      const anim = list[ref.animIndex || 0]
+      if (!anim) return
+      for (const [k, v] of Object.entries(props)) {
+        if (v == null) continue
+        anim.setAttribute(k, String(v))
+      }
+      this.xml = new XMLSerializer().serializeToString(doc.documentElement)
+      this.undoStack.push(before)
+      this.redoStack = []
     },
   },
 })
