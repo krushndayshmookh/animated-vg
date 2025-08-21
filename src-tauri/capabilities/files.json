@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "files",
+  "description": "Allow main window to open/save files via dialog and read/write text files under the user's home.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

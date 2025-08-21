@@ -1,8 +1,8 @@
-import { app, BrowserWindow } from 'electron'
-import { initialize as initRemote, enable as enableRemote } from '@electron/remote/main'
+import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
+import fs from 'node:fs/promises'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -12,8 +12,6 @@ const currentDir = fileURLToPath(new URL('.', import.meta.url))
 let mainWindow
 
 async function createWindow () {
-  // initialize @electron/remote once
-  initRemote()
   /**
    * Initial window options
    */
@@ -32,8 +30,26 @@ async function createWindow () {
     }
   })
 
-  // enable @electron/remote for this window
-  enableRemote(mainWindow.webContents)
+  // IPC handlers for dialog and file I/O
+  ipcMain.handle('dialog:open', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: [{ name: 'SVG', extensions: ['svg'] }]
+    })
+    if (canceled || !filePaths?.length) return null
+    const p = filePaths[0]
+    const contents = await fs.readFile(p, 'utf8')
+    return { path: p, contents }
+  })
+
+  ipcMain.handle('dialog:save', async (_evt, xml) => {
+    const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+      filters: [{ name: 'SVG', extensions: ['svg'] }]
+    })
+    if (canceled || !filePath) return null
+    await fs.writeFile(filePath, xml, 'utf8')
+    return { path: filePath }
+  })
 
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL)
