@@ -23,11 +23,13 @@
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
+    "@electron/packager": "^18.4.2",
     "@eslint/js": "^9.14.0",
     "@quasar/app-vite": "^2.1.0",
     "@tauri-apps/cli": "^2.8.1",
     "@vue/eslint-config-prettier": "^10.1.0",
     "autoprefixer": "^10.4.2",
+    "electron": "^37.3.1",
     "eslint": "^9.14.0",
     "eslint-plugin-vue": "^9.30.0",
     "globals": "^15.12.0",
