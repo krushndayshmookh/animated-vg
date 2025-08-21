@@ -105,7 +105,7 @@ function toLocalCoords(evt) {
 }
 
 function onMouseDown(evt) {
-  if (store.activeTool === 'rect') {
+  if (store.activeTool === 'rect' || store.activeTool === 'ellipse' || store.activeTool === 'line') {
     drawing.value = true
     start.value = toLocalCoords(evt)
     current.value = { ...start.value }
@@ -125,12 +125,16 @@ function onMouseMove(evt) {
 }
 
 function onMouseUp(evt) {
-  if (drawing.value && store.activeTool === 'rect') {
+  if (drawing.value && (store.activeTool === 'rect' || store.activeTool === 'ellipse' || store.activeTool === 'line')) {
     const end = toLocalCoords(evt)
     const w = end.x - start.value.x
     const h = end.y - start.value.y
-    if (Math.abs(w) > 2 && Math.abs(h) > 2) {
-      store.addRect(start.value.x, start.value.y, w, h)
+    if (store.activeTool === 'rect') {
+      if (Math.abs(w) > 2 && Math.abs(h) > 2) store.addRect(start.value.x, start.value.y, w, h)
+    } else if (store.activeTool === 'ellipse') {
+      if (Math.abs(w) > 2 && Math.abs(h) > 2) store.addEllipse(start.value.x, start.value.y, w, h)
+    } else if (store.activeTool === 'line') {
+      if (Math.abs(w) > 2 || Math.abs(h) > 2) store.addLine(start.value.x, start.value.y, end.x, end.y)
     }
     drawing.value = false
   }

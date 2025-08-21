@@ -2,64 +2,6 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "vitest-run",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		},
-		{
-			"label": "vitest-run-2",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot",
-				"tests/draw-select.test.js"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		},
-		{
-			"label": "vitest-run-all",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		},
-		{
-			"label": "vitest-run-2",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot",
-				"tests/draw-select.test.js"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		},
-		{
 			"label": "vitest-run-all",
 			"type": "shell",
 			"command": "pnpm",

@@ -6,6 +6,8 @@
   <q-btn flat dense icon="save" data-test="toolbar-save" @click="$emit('save')" />
   <q-btn flat dense icon="mouse" data-test="tool-select" @click="$emit('set-tool', 'select')" />
   <q-btn flat dense icon="crop_square" data-test="tool-rect" @click="$emit('set-tool', 'rect')" />
+  <q-btn flat dense icon="radio_button_unchecked" data-test="tool-ellipse" @click="$emit('set-tool', 'ellipse')" />
+  <q-btn flat dense icon="show_chart" data-test="tool-line" @click="$emit('set-tool', 'line')" />
     <q-btn flat dense icon="view_sidebar" data-test="toolbar-toggle-right" @click="$emit('toggle-right')" />
     <q-btn flat dense icon="unfold_more" data-test="toolbar-toggle-bottom" @click="$emit('toggle-bottom')" />
   </q-toolbar>

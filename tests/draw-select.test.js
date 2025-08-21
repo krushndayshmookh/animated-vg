@@ -69,6 +69,34 @@ describe('M3 drawing and selection', () => {
     expect(store.selectedId).not.toBeNull()
   })
 
+  it('draws and selects an ellipse', async () => {
+    const { wrapper, store } = mountPage()
+    store.setActiveTool('ellipse')
+    const canvas = wrapper.find('[data-test="editor-canvas"]')
+    await canvas.trigger('mousedown', { clientX: 20, clientY: 20 })
+    await canvas.trigger('mouseup', { clientX: 100, clientY: 80 })
+    await nextTick()
+    // switch to select
+    store.setActiveTool('select')
+    await canvas.trigger('click', { clientX: 60, clientY: 50 })
+    await nextTick()
+    expect(store.selectedId).not.toBeNull()
+  })
+
+  it('draws and selects a line', async () => {
+    const { wrapper, store } = mountPage()
+    store.setActiveTool('line')
+    const canvas = wrapper.find('[data-test="editor-canvas"]')
+    await canvas.trigger('mousedown', { clientX: 30, clientY: 30 })
+    await canvas.trigger('mouseup', { clientX: 90, clientY: 60 })
+    await nextTick()
+    // select near the center
+    store.setActiveTool('select')
+    await canvas.trigger('click', { clientX: 60, clientY: 45 })
+    await nextTick()
+    expect(store.selectedId).not.toBeNull()
+  })
+
   it('shows rubber-band preview while drawing', async () => {
     const { wrapper, store } = mountPage()
     store.setActiveTool('rect')
