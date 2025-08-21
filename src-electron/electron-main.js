@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron'
+import { initialize as initRemote, enable as enableRemote } from '@electron/remote/main'
 import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -11,6 +12,8 @@ const currentDir = fileURLToPath(new URL('.', import.meta.url))
 let mainWindow
 
 async function createWindow () {
+  // initialize @electron/remote once
+  initRemote()
   /**
    * Initial window options
    */
@@ -28,6 +31,9 @@ async function createWindow () {
       )
     }
   })
+
+  // enable @electron/remote for this window
+  enableRemote(mainWindow.webContents)
 
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL)

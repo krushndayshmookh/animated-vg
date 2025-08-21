@@ -1,29 +1,25 @@
-/**
- * This file is used specifically for security reasons.
- * Here you can access Nodejs stuff and inject functionality into
- * the renderer thread (accessible there through the "window" object)
- *
- * WARNING!
- * If you import anything from node_modules, then make sure that the package is specified
- * in package.json > dependencies and NOT in devDependencies
- *
- * Example (injects window.myAPI.doAThing() into renderer thread):
- *
- *   import { contextBridge } from 'electron'
- *
- *   contextBridge.exposeInMainWorld('myAPI', {
- *     doAThing: () => {}
- *   })
- *
- * WARNING!
- * If accessing Node functionality (like importing @electron/remote) then in your
- * electron-main.js you will need to set the following when you instantiate BrowserWindow:
- *
- * mainWindow = new BrowserWindow({
- *   // ...
- *   webPreferences: {
- *     // ...
- *     sandbox: false // <-- to be able to import @electron/remote in preload script
- *   }
- * }
- */
+import { contextBridge } from 'electron'
+import fs from 'node:fs/promises'
+import { dialog } from '@electron/remote'
+
+// Minimal, safe bridge API for file open/save. Ensure nodeIntegration is off and contextIsolation is true.
+contextBridge.exposeInMainWorld('electronAPI', {
+	async open() {
+		const { canceled, filePaths } = await dialog.showOpenDialog({
+			properties: ['openFile'],
+			filters: [{ name: 'SVG', extensions: ['svg'] }],
+		})
+		if (canceled || !filePaths?.length) return null
+		const p = filePaths[0]
+		const contents = await fs.readFile(p, 'utf8')
+		return { path: p, contents }
+	},
+	async save(xml) {
+		const { canceled, filePath } = await dialog.showSaveDialog({
+			filters: [{ name: 'SVG', extensions: ['svg'] }],
+		})
+		if (canceled || !filePath) return null
+		await fs.writeFile(filePath, xml, 'utf8')
+		return { path: filePath }
+	},
+})
