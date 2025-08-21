@@ -6,6 +6,7 @@
       @toggle-bottom="bottomOpen = !bottomOpen"
   @open="onOpen"
   @save="onSave"
+  @set-tool="onSetTool"
     />
 
     <q-splitter v-model="hSplit" unit="px" style="height: calc(100vh - 50px)">
@@ -68,5 +69,9 @@ async function onOpen () {
 async function onSave () {
   const xml = store.exportXml()
   await saveDialog(xml)
+}
+
+function onSetTool (tool) {
+  store.setActiveTool(tool)
 }
 </script>
