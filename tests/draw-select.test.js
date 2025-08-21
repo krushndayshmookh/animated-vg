@@ -68,4 +68,41 @@ describe('M3 drawing and selection', () => {
     await nextTick()
     expect(store.selectedId).not.toBeNull()
   })
+
+  it('shows rubber-band preview while drawing', async () => {
+    const { wrapper, store } = mountPage()
+    store.setActiveTool('rect')
+    const canvas = wrapper.find('[data-test="editor-canvas"]')
+    await canvas.trigger('mousedown', { clientX: 10, clientY: 10 })
+    await canvas.trigger('mousemove', { clientX: 80, clientY: 50 })
+    await nextTick()
+  const rubber = wrapper.find('[data-test="rubber-band"]')
+  const exists = rubber.exists() || wrapper.find('.rubber-outline').exists()
+  expect(exists).toBe(true)
+    await canvas.trigger('mouseup', { clientX: 80, clientY: 50 })
+  })
+
+  it('drags selected rect using selection overlay', async () => {
+    const { wrapper, store } = mountPage()
+    // create rect
+    store.setActiveTool('rect')
+    const canvas = wrapper.find('[data-test="editor-canvas"]')
+    await canvas.trigger('mousedown', { clientX: 10, clientY: 10 })
+    await canvas.trigger('mouseup', { clientX: 60, clientY: 40 })
+    await nextTick()
+    // select it
+    store.setActiveTool('select')
+    await canvas.trigger('click', { clientX: 15, clientY: 15 })
+    await nextTick()
+    const before = store.getRectById(store.selectedId)
+    // drag selection overlay
+    const overlay = wrapper.find('[data-test="selection-outline"]')
+    await overlay.trigger('mousedown', { clientX: before.x + 2, clientY: before.y + 2 })
+    await canvas.trigger('mousemove', { clientX: before.x + 20, clientY: before.y + 25 })
+    await canvas.trigger('mouseup', { clientX: before.x + 20, clientY: before.y + 25 })
+    await nextTick()
+    const after = store.getRectById(store.selectedId)
+    expect(after.x).toBe(before.x + 18)
+    expect(after.y).toBe(before.y + 23)
+  })
 })
