@@ -5,9 +5,17 @@
     <EditorToolbar
       side="left"
       :items="[
-        { name: 'home', icon: 'home', tooltip: 'Home' },
-        { name: 'settings', icon: 'settings', onClick: () => console.log('Settings clicked') },
-        { name: 'help', icon: 'help', onClick: () => console.log('Help clicked') },
+        { name: 'home', icon: 'eva-home-outline', tooltip: 'Home' },
+        {
+          name: 'settings',
+          icon: 'eva-settings-outline',
+          onClick: () => console.log('Settings clicked'),
+        },
+        {
+          name: 'help',
+          icon: 'eva-question-mark-circle-outline',
+          onClick: () => console.log('Help clicked'),
+        },
       ]"
       @toolbar-click="handleToolbarClick"
     />
@@ -15,9 +23,9 @@
     <EditorToolbar
       side="right"
       :items="[
-        { name: 'undo', icon: 'undo', tooltip: 'Undo' },
-        { name: 'redo', icon: 'redo' },
-        { name: 'save', icon: 'save' },
+        { name: 'undo', icon: 'eva-undo-outline', tooltip: 'Undo' },
+        { name: 'redo', icon: 'eva-undo-outline', tooltip: 'Redo', iconFlip: true },
+        { name: 'save', icon: 'eva-save-outline', tooltip: 'Save' },
       ]"
       @toolbar-click="handleToolbarClick"
     />
@@ -30,9 +38,10 @@
       side="bottom"
       direction="row"
       :items="[
-        { name: 'play', icon: 'play_arrow', tooltip: 'Play' },
-        { name: 'pause', icon: 'pause', tooltip: 'Pause' },
-        { name: 'stop', icon: 'stop', tooltip: 'Stop' },
+        { name: 'play', icon: 'eva-play-circle-outline', tooltip: 'Play' },
+        { name: 'pause', icon: 'eva-pause-circle-outline', tooltip: 'Pause' },
+        { name: 'stop', icon: 'eva-stop-circle-outline', tooltip: 'Stop' },
+        { name: 'add-frame', icon: 'eva-plus-circle-outline', tooltip: 'Add Frame' },
       ]"
       @toolbar-click="handleToolbarClick"
     />

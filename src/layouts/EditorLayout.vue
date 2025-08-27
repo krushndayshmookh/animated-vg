@@ -2,14 +2,14 @@
   <q-layout view="hHh lpr lFr">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
+        <!-- <q-btn
           flat
           round
           dense
-          icon="menu"
+          icon="eva-menu-outline"
           data-test="toolbar-toggle-left"
           @click="editorStore.toggleSidebarLeft"
-        />
+        /> -->
 
         <q-toolbar-title> AnimatedVG </q-toolbar-title>
 
@@ -17,7 +17,16 @@
           flat
           round
           dense
-          icon="content_copy"
+          icon="eva-arrowhead-left-outline"
+          data-test="toolbar-toggle-left"
+          @click="editorStore.toggleSidebarLeft"
+        />
+
+        <q-btn
+          flat
+          round
+          dense
+          icon="eva-arrowhead-right-outline"
           data-test="toolbar-toggle-right"
           @click="editorStore.toggleSidebarRight"
         />
@@ -26,7 +35,7 @@
           flat
           round
           dense
-          icon="unfold_more"
+          icon="eva-arrowhead-down-outline"
           data-test="toolbar-toggle-bottom"
           @click="editorStore.toggleSidebarBottom"
         />
