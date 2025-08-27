@@ -1,7 +1,7 @@
 <template>
   <div :class="`absolute-${props.side}`">
     <q-card class="q-col-gutter-xs q-ma-sm" :class="props.direction">
-      <div v-for="item in props.items" :key="item.name" class="col q-pa-xs">
+      <div v-for="item in props.items" :key="item.name" class="col-auto q-pa-xs">
         <q-btn
           :flat="!item.isActive"
           dense
