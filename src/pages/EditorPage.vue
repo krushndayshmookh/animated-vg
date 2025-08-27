@@ -1,37 +1,41 @@
 <template>
   <q-page class="column" data-test="editor-page">
-
     <!-- floating left toolbar -->
 
-    <div class="absolute-left">
-      <q-card class="column q-gutter-xs q-ma-sm">
-        <q-btn round flat class="" icon="home" />
-        <q-btn round flat class="" icon="home" />
-        <q-btn round flat class="" icon="home" />
-      </q-card>
-    </div>
+    <EditorToolbar
+      side="left"
+      :items="[
+        { name: 'home', icon: 'home', tooltip: 'Home' },
+        { name: 'settings', icon: 'settings', onClick: () => console.log('Settings clicked') },
+        { name: 'help', icon: 'help', onClick: () => console.log('Help clicked') },
+      ]"
+      @toolbar-click="handleToolbarClick"
+    />
+
+    <EditorToolbar
+      side="right"
+      :items="[
+        { name: 'undo', icon: 'undo', tooltip: 'Undo' },
+        { name: 'redo', icon: 'redo' },
+        { name: 'save', icon: 'save' },
+      ]"
+      @toolbar-click="handleToolbarClick"
+    />
 
     <!-- floating right toolbar -->
 
-    <div class="absolute-right">
-      <q-card class="column q-gutter-xs q-ma-sm">
-        <q-btn round flat class="" icon="person" />
-        <q-btn round flat class="" icon="person" />
-        <q-btn round flat class="" icon="person" />
-      </q-card>
-    </div>
-
     <!-- floating bottom toolbar -->
 
-    <div class="absolute-bottom">
-      <q-card class="row q-gutter-xs q-ma-sm">
-        <q-btn round flat class="" icon="timeline" />
-        <q-btn round flat class="" icon="timeline" />
-        <q-btn round flat class="" icon="timeline" />
-      </q-card>
-    </div>
-
-
+    <EditorToolbar
+      side="bottom"
+      direction="row"
+      :items="[
+        { name: 'play', icon: 'play_arrow', tooltip: 'Play' },
+        { name: 'pause', icon: 'pause', tooltip: 'Pause' },
+        { name: 'stop', icon: 'stop', tooltip: 'Stop' },
+      ]"
+      @toolbar-click="handleToolbarClick"
+    />
 
     <!-- <EditorToolbar
       @toggle-left="editorStore.toggleSidebarLeft"
@@ -73,6 +77,12 @@
 </template>
 
 <script setup>
+import EditorToolbar from 'src/components/editor/EditorToolbar.vue'
+
+function handleToolbarClick(item) {
+  console.log('Toolbar item clicked:', item)
+}
+
 // import { ref } from 'vue'
 // import { useEditorStore } from 'src/stores/editor-store.js'
 // import { openDialog, saveDialog } from 'src/services/fs-client'

@@ -1,34 +1,69 @@
 <template>
-  <q-toolbar class="bg-grey-2 text-dark" data-test="editor-toolbar">
-    <q-btn flat dense icon="folder_open" data-test="toolbar-open" @click="$emit('open')" />
-    <q-btn flat dense icon="save" data-test="toolbar-save" @click="$emit('save')" />
-    <q-btn flat dense icon="mouse" data-test="tool-select" @click="$emit('set-tool', 'select')" />
-    <q-btn flat dense icon="crop_square" data-test="tool-rect" @click="$emit('set-tool', 'rect')" />
-    <q-btn
-      flat
-      dense
-      icon="radio_button_unchecked"
-      data-test="tool-ellipse"
-      @click="$emit('set-tool', 'ellipse')"
-    />
-    <q-btn flat dense icon="show_chart" data-test="tool-line" @click="$emit('set-tool', 'line')" />
-    <q-btn
-      flat
-      dense
-      icon="view_sidebar"
-      data-test="toolbar-toggle-right"
-      @click="$emit('toggle-right')"
-    />
-    <q-btn
-      flat
-      dense
-      icon="unfold_more"
-      data-test="toolbar-toggle-bottom"
-      @click="$emit('toggle-bottom')"
-    />
-  </q-toolbar>
+  <div :class="`absolute-${props.side}`">
+    <q-card class="q-gutter-xs q-ma-sm" :class="props.direction">
+      <q-btn
+        v-for="item in props.items"
+        :key="item.name"
+        round
+        flat
+        class=""
+        :icon="item.icon"
+        @click="handleItemClick(item)"
+      >
+        <q-tooltip v-if="item.tooltip" :anchor="TOOLTIP_ANCHORS[props.side]">
+          {{ item.tooltip }}
+        </q-tooltip>
+      </q-btn>
+    </q-card>
+  </div>
 </template>
 
 <script setup>
-defineEmits(['toggle-left', 'toggle-right', 'toggle-bottom', 'open', 'save', 'set-tool'])
+const props = defineProps({
+  side: {
+    type: String,
+    required: true,
+    default: 'left',
+  },
+
+  items: {
+    type: Array,
+    required: false,
+    default: () => [],
+  },
+
+  direction: {
+    type: String,
+    required: false,
+    default: 'column',
+  },
+})
+
+const emit = defineEmits(['toolbar-click'])
+
+function handleItemClick(item) {
+  if (typeof item.onClick === 'function') {
+    item.onClick()
+  } else {
+    emit('toolbar-click', item)
+  }
+}
+
+const TOOLTIP_ANCHORS = {
+  left: 'center right',
+  right: 'center left',
+  top: 'bottom middle',
+  bottom: 'top middle',
+}
+
+/*
+
+interface Item {
+  name: string
+  icon: string
+  tooltip?: string
+  onClick?: () => void
+}
+
+*/
 </script>
