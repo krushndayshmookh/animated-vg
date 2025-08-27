@@ -1,22 +1,22 @@
 <template>
   <div :class="`absolute-${props.side}`">
-    <q-card class="q-gutter-xs q-ma-sm" :class="props.direction">
-      <q-btn
-        v-for="item in props.items"
-        :key="item.name"
-        round
-        flat
-        class=""
-        :icon="item.icon"
-        :style="{
-          transform: item.iconFlip ? 'scaleX(-1)' : 'none',
-        }"
-        @click="handleItemClick(item)"
-      >
-        <q-tooltip v-if="item.tooltip" :anchor="TOOLTIP_ANCHORS[props.side]">
-          {{ item.tooltip }}
-        </q-tooltip>
-      </q-btn>
+    <q-card class="q-col-gutter-xs q-ma-sm" :class="props.direction">
+      <div v-for="item in props.items" :key="item.name" class="col q-pa-xs">
+        <q-btn
+          :flat="!item.isActive"
+          dense
+          :icon="item.icon"
+          :style="{
+            transform: item.iconFlip ? 'scaleX(-1)' : 'none',
+          }"
+          :color="item.isActive ? 'primary' : 'default'"
+          @click="handleItemClick(item)"
+        >
+          <q-tooltip v-if="item.tooltip" :anchor="TOOLTIP_ANCHORS[props.side]">
+            {{ item.tooltip }}
+          </q-tooltip>
+        </q-btn>
+      </div>
     </q-card>
   </div>
 </template>
@@ -67,6 +67,7 @@ interface Item {
   tooltip?: string
   onClick?: () => void
   iconFlip?: boolean
+  isActive?: boolean
 }
 
 */
