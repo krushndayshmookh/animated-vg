@@ -8,6 +8,9 @@
         flat
         class=""
         :icon="item.icon"
+        :style="{
+          transform: item.iconFlip ? 'scaleX(-1)' : 'none',
+        }"
         @click="handleItemClick(item)"
       >
         <q-tooltip v-if="item.tooltip" :anchor="TOOLTIP_ANCHORS[props.side]">
@@ -63,6 +66,7 @@ interface Item {
   icon: string
   tooltip?: string
   onClick?: () => void
+  iconFlip?: boolean
 }
 
 */
