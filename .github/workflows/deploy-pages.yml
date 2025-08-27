@@ -21,27 +21,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: true
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: pnpm i --frozen-lockfile
+        run: npm install
 
       - name: Build
         env:
           GITHUB_PAGES: 'true'
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          pnpm run build
+          npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

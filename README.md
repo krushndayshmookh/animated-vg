@@ -20,53 +20,46 @@ For the milestone-by-milestone plan and scope, see PLAN.md.
 Prereqs
 
 - Node.js 18+ recommended
-- Package manager: pnpm (preferred), npm, or yarn
+- Package manager: npm (preferred), yarn
 
 Install
 
 ```bash
-# pnpm (preferred)
-pnpm install
-
-# or npm
 npm install
-
-# or yarn
-yarn
 ```
 
 Dev server (web)
 
 ```bash
-pnpm dev
+npm run dev
 # opens Quasar dev server with hot reload
 ```
 
 Unit/component tests
 
 ```bash
-pnpm test         # run once
-pnpm test:watch   # watch mode
+npm test           # run once
+npm run test:watch # watch mode
 ```
 
 E2E tests (Playwright)
 
 ```bash
-pnpm e2e:install  # one-time browsers/deps install
-pnpm e2e
+npm run e2e:install  # one-time browsers/deps install
+npm run e2e
 ```
 
 Lint and format
 
 ```bash
-pnpm lint
-pnpm format
+npm run lint
+npm run format
 ```
 
 Build (web)
 
 ```bash
-pnpm build
+npm run build
 # Produces a production build via Quasar
 ```
 
@@ -88,7 +81,7 @@ Desktop notes
 - Electron smoke (quick sanity run):
 
 ```bash
-pnpm electron:smoke
+npm run electron:smoke
 ```
 
 - Tauri dev: Tauri CLI is present; you can try:

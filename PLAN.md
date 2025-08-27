@@ -133,7 +133,7 @@ M0 – Test harness and scaffolding
   - Rust: trivial command test placeholder
   - Electron: renderer loads EditorPage via Chromium
 - Acceptance
-  - `pnpm test` runs unit + component tests; `pnpm e2e` runs Playwright headless; CI green
+  - `npm test` runs unit + component tests; `npm run e2e` runs Playwright headless; CI green
 
 M1 – Editor shell UI
 
@@ -298,7 +298,7 @@ Dev/build targets (reference)
 - Lint, typecheck, test (unit/component/e2e), Rust tests
 - Minimal pipeline steps:
   - Build (web) – quasar build
-  - Build (tauri) – pnpm tauri build (optional in CI)
+  - Build (tauri) – npx tauri build (optional in CI)
   - Build (electron) – quasar build -m electron (optional in CI)
 - Gates: must be green before merging major features
 

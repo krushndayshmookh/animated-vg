@@ -11,7 +11,7 @@ By participating in this project, you agree to uphold a respectful, inclusive en
 Prerequisites
 
 - Node.js 18+
-- pnpm (preferred) or npm/yarn
+- npm (preferred) or yarn
 - For desktop dev: Rust toolchain (for Tauri) and platform SDKs if you plan to run native builds
 
 Clone and install
@@ -19,21 +19,21 @@ Clone and install
 ```bash
 git clone https://github.com/krushndayshmookh/animated-vg.git
 cd animated-vg
-pnpm install
+npm install
 ```
 
 Useful scripts
 
 ```bash
-pnpm dev          # web dev server
-pnpm test         # unit/component tests
-pnpm test:watch   # watch mode
-pnpm e2e:install  # playwright browsers
-pnpm e2e          # e2e tests
-pnpm lint         # eslint
-pnpm format       # prettier write
-pnpm build        # production build
-pnpm electron:smoke  # Electron smoke run
+npm run dev            # web dev server
+npm test               # unit/component tests
+npm run test:watch     # watch mode
+npm run e2e:install    # playwright browsers
+npm run e2e            # e2e tests
+npm run lint           # eslint
+npm run format         # prettier write
+npm run build          # production build
+npm run electron:smoke # Electron smoke run
 ```
 
 ## Development workflow
@@ -47,7 +47,7 @@ pnpm electron:smoke  # Electron smoke run
 ## Coding standards
 
 - JavaScript/Vue 3 with Composition API; follow existing patterns.
-- ESLint + Prettier are configured. Run `pnpm lint` and `pnpm format` before pushing.
+- ESLint + Prettier are configured. Run `npm run lint` and `npm run format` before pushing.
 - Avoid introducing new dependencies unless necessary; prefer small, well-maintained libraries.
 
 ## Commit style
