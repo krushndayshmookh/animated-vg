@@ -21,7 +21,9 @@ export const useEditorStore = defineStore('editor', {
       this.snapEnabled = !!enabled
       if (typeof size === 'number' && size > 0) this.snapSize = size
     },
-    setShowGrid(show) { this.showGrid = !!show },
+    setShowGrid(show) {
+      this.showGrid = !!show
+    },
     _snap(n) {
       if (!this.snapEnabled) return n
       const s = this.snapSize || 10
@@ -136,19 +138,24 @@ export const useEditorStore = defineStore('editor', {
       this.redoStack = []
       return id
     },
-    addOpacityAnimation(targetId, { from = 1, to = 0.5, dur = '1s', begin = '0s', fill = 'freeze' } = {}) {
+    addOpacityAnimation(
+      targetId,
+      { from = 1, to = 0.5, dur = '1s', begin = '0s', fill = 'freeze' } = {},
+    ) {
       const before = this.xml
       const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
       const target = doc.getElementById(targetId)
       if (!target) return null
       // Avoid adding an identical duplicate
-      const existing = Array.from(target.children).find(c => (c.tagName || '').toLowerCase() === 'animate' &&
-        c.getAttribute('attributeName') === 'opacity' &&
-        c.getAttribute('from') === String(from) &&
-        c.getAttribute('to') === String(to) &&
-        c.getAttribute('dur') === String(dur) &&
-        c.getAttribute('begin') === String(begin) &&
-        c.getAttribute('fill') === String(fill)
+      const existing = Array.from(target.children).find(
+        (c) =>
+          (c.tagName || '').toLowerCase() === 'animate' &&
+          c.getAttribute('attributeName') === 'opacity' &&
+          c.getAttribute('from') === String(from) &&
+          c.getAttribute('to') === String(to) &&
+          c.getAttribute('dur') === String(dur) &&
+          c.getAttribute('begin') === String(begin) &&
+          c.getAttribute('fill') === String(fill),
       )
       if (existing) return existing
       const anim = doc.createElement('animate')
@@ -366,7 +373,7 @@ export const useEditorStore = defineStore('editor', {
       const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
       const svg = doc.documentElement
       const el = doc.getElementById(this.selectedId)
-      if (!el || el.parentNode === svg && el.tagName === 'g') return null
+      if (!el || (el.parentNode === svg && el.tagName === 'g')) return null
       const parent = el.parentNode
       const g = doc.createElement('g')
       const gid = this._genId('group')
@@ -411,18 +418,28 @@ export const useEditorStore = defineStore('editor', {
       const idx = siblings.indexOf(el)
       if (idx === -1) return
       if (direction === 'front' && el.nextSibling) parent.appendChild(el)
-      else if (direction === 'back' && el.previousSibling) parent.insertBefore(el, parent.firstChild)
+      else if (direction === 'back' && el.previousSibling)
+        parent.insertBefore(el, parent.firstChild)
       else if (direction === 'forward' && el.nextSibling) parent.insertBefore(el.nextSibling, el)
-      else if (direction === 'backward' && el.previousSibling) parent.insertBefore(el, el.previousSibling)
+      else if (direction === 'backward' && el.previousSibling)
+        parent.insertBefore(el, el.previousSibling)
       else return
       this.xml = new XMLSerializer().serializeToString(doc.documentElement)
       this.undoStack.push(before)
       this.redoStack = []
     },
-    bringToFront() { this._reorderSelected('front') },
-    sendToBack() { this._reorderSelected('back') },
-    bringForward() { this._reorderSelected('forward') },
-    sendBackward() { this._reorderSelected('backward') },
+    bringToFront() {
+      this._reorderSelected('front')
+    },
+    sendToBack() {
+      this._reorderSelected('back')
+    },
+    bringForward() {
+      this._reorderSelected('forward')
+    },
+    sendBackward() {
+      this._reorderSelected('backward')
+    },
     // Path conversion (MVP: rect, line)
     convertSelectedToPath() {
       if (!this.selectedId) return
@@ -436,7 +453,7 @@ export const useEditorStore = defineStore('editor', {
       const path = doc.createElement('path')
       path.setAttribute('id', id)
       // carry over styling
-      ;['fill','stroke','stroke-width','opacity'].forEach(a => {
+      ;['fill', 'stroke', 'stroke-width', 'opacity'].forEach((a) => {
         if (el.hasAttribute(a)) path.setAttribute(a, el.getAttribute(a))
       })
       if (tag === 'rect') {
@@ -491,7 +508,9 @@ export const useEditorStore = defineStore('editor', {
         const targetId = el.getAttribute && el.getAttribute('id')
         if (!targetId) continue
         if (filterTargetId && targetId !== filterTargetId) continue
-  const anims = Array.from(el.children).filter(c => (c.tagName || '').toLowerCase() === 'animate')
+        const anims = Array.from(el.children).filter(
+          (c) => (c.tagName || '').toLowerCase() === 'animate',
+        )
         anims.forEach((animEl, idx) => {
           const entry = {
             kind: 'animate',
@@ -519,7 +538,9 @@ export const useEditorStore = defineStore('editor', {
       const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
       const target = doc.getElementById(ref.targetId)
       if (!target) return
-  const list = Array.from(target.children).filter(c => (c.tagName || '').toLowerCase() === 'animate')
+      const list = Array.from(target.children).filter(
+        (c) => (c.tagName || '').toLowerCase() === 'animate',
+      )
       const anim = list[ref.animIndex || 0]
       if (!anim) return
       for (const [k, v] of Object.entries(props)) {

@@ -16,13 +16,21 @@ function mountPage() {
         'q-page': { template: '<div><slot /></div>' },
         'q-toolbar': { template: '<div><slot /></div>' },
         'q-toolbar-title': { template: '<div><slot /></div>' },
-        'q-btn': { props: ['label'], template: '<button @click="$emit(\'click\')"><slot />{{ label }}</button>' },
+        'q-btn': {
+          props: ['label'],
+          template: '<button @click="$emit(\'click\')"><slot />{{ label }}</button>',
+        },
         'q-splitter': { template: '<div><slot name="before" /><slot name="after" /></div>' },
         'q-drawer': { template: '<div><slot /></div>' },
         'q-list': { template: '<ul><slot /></ul>' },
         'q-item': { template: '<li><slot /></li>' },
         'q-item-section': { template: '<div><slot /></div>' },
-        'q-input': { props: ['modelValue'], emits: ['update:modelValue'], template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />' },
+        'q-input': {
+          props: ['modelValue'],
+          emits: ['update:modelValue'],
+          template:
+            '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+        },
         'q-slide-transition': { template: '<div><slot /></div>' },
       },
     },
@@ -64,7 +72,8 @@ describe('M5 Timeline minimal animation', () => {
     const { wrapper } = mountPage()
     const host = document.querySelector('[data-test="editor-canvas"]')
     // Patch the existing inline svg rendered by Canvas
-    const realSvg = host.querySelector('svg') || document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    const realSvg =
+      host.querySelector('svg') || document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     // Attach spies
     realSvg.unpauseAnimations = vi.fn()
     realSvg.pauseAnimations = vi.fn()

@@ -104,9 +104,9 @@ describe('M3 drawing and selection', () => {
     await canvas.trigger('mousedown', { clientX: 10, clientY: 10 })
     await canvas.trigger('mousemove', { clientX: 80, clientY: 50 })
     await nextTick()
-  const rubber = wrapper.find('[data-test="rubber-band"]')
-  const exists = rubber.exists() || wrapper.find('.rubber-outline').exists()
-  expect(exists).toBe(true)
+    const rubber = wrapper.find('[data-test="rubber-band"]')
+    const exists = rubber.exists() || wrapper.find('.rubber-outline').exists()
+    expect(exists).toBe(true)
     await canvas.trigger('mouseup', { clientX: 80, clientY: 50 })
   })
 

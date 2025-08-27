@@ -1,6 +1,5 @@
 // Basic SVG import/export helpers for M2
 
-
 export function importSvg(xml) {
   const doc = new DOMParser().parseFromString(xml, 'image/svg+xml')
   const svg = doc.documentElement
@@ -17,9 +16,7 @@ export function importSvg(xml) {
 export function exportSvg(xml, { pretty = false } = {}) {
   if (!pretty) return xml
   // simple pretty: add newline after tags (non-destructive best effort)
-  return xml
-    .replace(/></g, '>$\n<')
-    .replace(/\$\\n/g, '\n')
+  return xml.replace(/></g, '>$\n<').replace(/\$\\n/g, '\n')
 }
 
 export function sanitizeOnExport(svgEl) {

@@ -7,7 +7,7 @@ function mountWithQuasar(component) {
   // Mount with minimal stubs for Quasar components used in EditorPage
   return mount(component, {
     global: {
-  plugins: [createPinia()],
+      plugins: [createPinia()],
       stubs: {
         'q-page': true,
         'q-toolbar': true,

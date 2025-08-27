@@ -21,7 +21,12 @@ function mountPage() {
         'q-list': { template: '<ul><slot /></ul>' },
         'q-item': { template: '<li><slot /></li>' },
         'q-item-section': { template: '<div><slot /></div>' },
-        'q-input': { props: ['modelValue'], emits: ['update:modelValue'], template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />' },
+        'q-input': {
+          props: ['modelValue'],
+          emits: ['update:modelValue'],
+          template:
+            '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+        },
         'q-slide-transition': { template: '<div><slot /></div>' },
       },
     },

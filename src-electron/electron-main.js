@@ -11,7 +11,7 @@ const currentDir = fileURLToPath(new URL('.', import.meta.url))
 
 let mainWindow
 
-async function createWindow () {
+async function createWindow() {
   /**
    * Initial window options
    */
@@ -25,16 +25,19 @@ async function createWindow () {
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
       preload: path.resolve(
         currentDir,
-        path.join(process.env.QUASAR_ELECTRON_PRELOAD_FOLDER, 'electron-preload' + process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION)
-      )
-    }
+        path.join(
+          process.env.QUASAR_ELECTRON_PRELOAD_FOLDER,
+          'electron-preload' + process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION,
+        ),
+      ),
+    },
   })
 
   // IPC handlers for dialog and file I/O
   ipcMain.handle('dialog:open', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile'],
-      filters: [{ name: 'SVG', extensions: ['svg'] }]
+      filters: [{ name: 'SVG', extensions: ['svg'] }],
     })
     if (canceled || !filePaths?.length) return null
     const p = filePaths[0]
@@ -44,7 +47,7 @@ async function createWindow () {
 
   ipcMain.handle('dialog:save', async (_evt, xml) => {
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-      filters: [{ name: 'SVG', extensions: ['svg'] }]
+      filters: [{ name: 'SVG', extensions: ['svg'] }],
     })
     if (canceled || !filePath) return null
     await fs.writeFile(filePath, xml, 'utf8')

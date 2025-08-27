@@ -18,7 +18,10 @@ describe('svg-io', () => {
   })
 
   it('sanitizeOnExport removes event handlers but keeps SMIL', () => {
-    const doc = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg"><g onclick="alert(1)"><animate attributeName="x" dur="1s"/></g></svg>', 'image/svg+xml')
+    const doc = new DOMParser().parseFromString(
+      '<svg xmlns="http://www.w3.org/2000/svg"><g onclick="alert(1)"><animate attributeName="x" dur="1s"/></g></svg>',
+      'image/svg+xml',
+    )
     const svg = doc.documentElement
     const sanitized = sanitizeOnExport(svg)
     expect(sanitized.querySelector('[onclick]')).toBeNull()

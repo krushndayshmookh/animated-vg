@@ -245,7 +245,7 @@ Commands (to be added)
 - npm run e2e – Playwright tests
 - npm run test:rust – cargo test in src-tauri
 - npm run ci – lint + typecheck + all tests
-  
+
 Dev/build targets (reference)
 
 - Web SPA dev: `quasar dev`
@@ -276,7 +276,7 @@ Dev/build targets (reference)
 ## 9) Security and sanitization
 
 - Incoming SVG: sanitize with DOMPurify
-  - Allow SMIL elements/attrs (animate*, keyTimes, values, dur, begin, etc.)
+  - Allow SMIL elements/attrs (animate\*, keyTimes, values, dur, begin, etc.)
   - Disallow script/event handler attributes and external references
 - Editor prevents injection of unsafe content when editing attributes
 - Maintain a whitelist of allowed attributes per element type
@@ -304,14 +304,14 @@ Dev/build targets (reference)
 
 ## 13) Implementation sequencing (high-level)
 
-1) M0: testing/tooling
-2) M1: shell UI
-3) M2: import/export + tauri FS commands
-4) M3: drawing + selection + undo/redo
-5) M4: inspector edits
-6) M5: SMIL timeline create/play
-7) M6: SMIL import/edit
-8) M7: polish (groups/z-order/path/edit, snapping, SVGO)
+1. M0: testing/tooling
+2. M1: shell UI
+3. M2: import/export + tauri FS commands
+4. M3: drawing + selection + undo/redo
+5. M4: inspector edits
+6. M5: SMIL timeline create/play
+7. M6: SMIL import/edit
+8. M7: polish (groups/z-order/path/edit, snapping, SVGO)
 
 ## 14) Definitions of Done (per feature)
 

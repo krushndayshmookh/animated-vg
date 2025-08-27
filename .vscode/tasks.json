@@ -1,61 +1,41 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "vitest-run-all",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		},
-		{
-			"label": "vitest-run-all",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		},
-		{
-			"label": "vitest-run-all",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		},
-		{
-			"label": "vitest-run-all",
-			"type": "shell",
-			"command": "pnpm",
-			"args": [
-				"-s",
-				"vitest",
-				"run",
-				"--reporter=dot"
-			],
-			"isBackground": false,
-			"problemMatcher": [],
-			"group": "build"
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "vitest-run-all",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-s", "vitest", "run", "--reporter=dot"],
+      "isBackground": false,
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "vitest-run-all",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-s", "vitest", "run", "--reporter=dot"],
+      "isBackground": false,
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "vitest-run-all",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-s", "vitest", "run", "--reporter=dot"],
+      "isBackground": false,
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "vitest-run-all",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-s", "vitest", "run", "--reporter=dot"],
+      "isBackground": false,
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
 }

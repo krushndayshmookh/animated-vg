@@ -6,12 +6,12 @@ function hasElectron() {
 
 async function getTauriApis() {
   try {
-  // Prefer global first to avoid dynamic import in non-tauri contexts (tests/web)
-  if (typeof window !== 'undefined' && window.__TAURI__) return window.__TAURI__
-  // Compute spec to avoid Vite static resolution during tests
-  const spec = ['@tauri-apps', 'api'].join('/')
-  const mod = await import(/* @vite-ignore */ spec)
-  return mod
+    // Prefer global first to avoid dynamic import in non-tauri contexts (tests/web)
+    if (typeof window !== 'undefined' && window.__TAURI__) return window.__TAURI__
+    // Compute spec to avoid Vite static resolution during tests
+    const spec = ['@tauri-apps', 'api'].join('/')
+    const mod = await import(/* @vite-ignore */ spec)
+    return mod
   } catch {
     // Fallback to global if injected
     if (typeof window !== 'undefined' && window.__TAURI__) return window.__TAURI__
@@ -23,7 +23,10 @@ export async function openDialog() {
   if (hasElectron()) return window.electronAPI.open()
   const tauri = await getTauriApis()
   if (tauri) {
-    const selected = await tauri.dialog.open({ multiple: false, filters: [{ name: 'SVG', extensions: ['svg'] }] })
+    const selected = await tauri.dialog.open({
+      multiple: false,
+      filters: [{ name: 'SVG', extensions: ['svg'] }],
+    })
     if (!selected) return null
     const contents = await tauri.fs.readTextFile(selected)
     return { path: selected, contents }

@@ -8,8 +8,8 @@ describe('App mount', () => {
   it('renders a router-view root', () => {
     const wrapper = mount(App, {
       global: {
-        stubs: ['router-view']
-      }
+        stubs: ['router-view'],
+      },
     })
     expect(wrapper.html()).toContain('router-view')
   })
