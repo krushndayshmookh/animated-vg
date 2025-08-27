@@ -44,7 +44,10 @@ export default defineConfig((/* ctx */) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      publicPath:
+        process.env.GITHUB_PAGES === 'true'
+          ? `/${(process.env.GITHUB_REPOSITORY || '').split('/')[1] || 'animated-vg'}/`
+          : '/',
       // analyze: true,
       // env: {},
       // rawDefine: {}

@@ -70,6 +70,19 @@ pnpm build
 # Produces a production build via Quasar
 ```
 
+## CI/CD (GitHub Pages)
+
+This repo includes a GitHub Actions workflow that builds the app and deploys to GitHub Pages on pushes to `main` or `master`.
+
+- Workflow: `.github/workflows/deploy-pages.yml`
+- Output: `dist/spa` (Quasar default) is published to Pages
+- Quasar `publicPath` is set automatically for Pages with `GITHUB_PAGES=true`
+
+To enable Pages:
+
+1) In the repo settings, enable GitHub Pages and choose “GitHub Actions” as the source.
+2) Push to `main` (or `master`) to trigger a deploy.
+
 Desktop notes
 
 - Electron smoke (quick sanity run):
