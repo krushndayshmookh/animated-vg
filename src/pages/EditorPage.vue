@@ -4,9 +4,9 @@
       @toggle-left="leftOpen = !leftOpen"
       @toggle-right="rightOpen = !rightOpen"
       @toggle-bottom="bottomOpen = !bottomOpen"
-  @open="onOpen"
-  @save="onSave"
-  @set-tool="onSetTool"
+      @open="onOpen"
+      @save="onSave"
+      @set-tool="onSetTool"
     />
 
     <q-splitter v-model="hSplit" unit="px" style="height: calc(100vh - 50px)">
@@ -59,19 +59,19 @@ const bottomOpen = ref(true)
 const hSplit = ref(250) // left panel width in px
 const vSplit = ref(70) // % height above timeline
 
-async function onOpen () {
+async function onOpen() {
   const result = await openDialog()
   if (result?.contents) {
     store.loadFromXml(result.contents)
   }
 }
 
-async function onSave () {
+async function onSave() {
   const xml = store.exportXml()
   await saveDialog(xml)
 }
 
-function onSetTool (tool) {
+function onSetTool(tool) {
   store.setActiveTool(tool)
 }
 </script>

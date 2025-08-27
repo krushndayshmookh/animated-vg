@@ -10,8 +10,23 @@ export const useEditorStore = defineStore('editor', {
     _idCounter: 1,
     undoStack: [],
     redoStack: [],
+    // M7 settings
+    snapEnabled: false,
+    snapSize: 10,
+    showGrid: false,
   }),
   actions: {
+    // Settings
+    setSnap(enabled, size) {
+      this.snapEnabled = !!enabled
+      if (typeof size === 'number' && size > 0) this.snapSize = size
+    },
+    setShowGrid(show) { this.showGrid = !!show },
+    _snap(n) {
+      if (!this.snapEnabled) return n
+      const s = this.snapSize || 10
+      return Math.round(n / s) * s
+    },
     loadFromXml(xml) {
       const { metadata } = importSvg(xml)
       this.xml = xml
@@ -43,11 +58,19 @@ export const useEditorStore = defineStore('editor', {
       const svg = doc.documentElement
       const rect = doc.createElement('rect')
       const id = this._genId('rect')
+      const sx = this._snap(x)
+      const sy = this._snap(y)
+      const ex = this._snap(x + width)
+      const ey = this._snap(y + height)
+      const nx = Math.min(sx, ex)
+      const ny = Math.min(sy, ey)
+      const nw = Math.abs(ex - sx)
+      const nh = Math.abs(ey - sy)
       rect.setAttribute('id', id)
-      rect.setAttribute('x', String(Math.min(x, x + width)))
-      rect.setAttribute('y', String(Math.min(y, y + height)))
-      rect.setAttribute('width', String(Math.abs(width)))
-      rect.setAttribute('height', String(Math.abs(height)))
+      rect.setAttribute('x', String(nx))
+      rect.setAttribute('y', String(ny))
+      rect.setAttribute('width', String(nw))
+      rect.setAttribute('height', String(nh))
       rect.setAttribute('fill', attrs.fill || 'rgba(0,0,0,0.1)')
       rect.setAttribute('stroke', attrs.stroke || '#333')
       rect.setAttribute('stroke-width', attrs.strokeWidth ? String(attrs.strokeWidth) : '1')
@@ -63,10 +86,14 @@ export const useEditorStore = defineStore('editor', {
       const svg = doc.documentElement
       const el = doc.createElement('ellipse')
       const id = this._genId('ellipse')
-      const nx = Math.min(x, x + width)
-      const ny = Math.min(y, y + height)
-      const w = Math.abs(width)
-      const h = Math.abs(height)
+      const sx = this._snap(x)
+      const sy = this._snap(y)
+      const ex = this._snap(x + width)
+      const ey = this._snap(y + height)
+      const nx = Math.min(sx, ex)
+      const ny = Math.min(sy, ey)
+      const w = Math.abs(ex - sx)
+      const h = Math.abs(ey - sy)
       const cx = nx + w / 2
       const cy = ny + h / 2
       const rx = Math.max(0, w / 2)
@@ -91,11 +118,15 @@ export const useEditorStore = defineStore('editor', {
       const svg = doc.documentElement
       const el = doc.createElement('line')
       const id = this._genId('line')
+      const sx1 = this._snap(x1)
+      const sy1 = this._snap(y1)
+      const sx2 = this._snap(x2)
+      const sy2 = this._snap(y2)
       el.setAttribute('id', id)
-      el.setAttribute('x1', String(x1))
-      el.setAttribute('y1', String(y1))
-      el.setAttribute('x2', String(x2))
-      el.setAttribute('y2', String(y2))
+      el.setAttribute('x1', String(sx1))
+      el.setAttribute('y1', String(sy1))
+      el.setAttribute('x2', String(sx2))
+      el.setAttribute('y2', String(sy2))
       el.setAttribute('stroke', attrs.stroke || '#333')
       el.setAttribute('stroke-width', attrs.strokeWidth ? String(attrs.strokeWidth) : '2')
       el.setAttribute('fill', 'none')
@@ -302,22 +333,24 @@ export const useEditorStore = defineStore('editor', {
       const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
       const el = doc.getElementById(this.selectedId)
       if (!el) return
+      const sx = this._snap(nx)
+      const sy = this._snap(ny)
       if (el.tagName === 'rect') {
-        el.setAttribute('x', String(nx))
-        el.setAttribute('y', String(ny))
+        el.setAttribute('x', String(sx))
+        el.setAttribute('y', String(sy))
       } else if (el.tagName === 'ellipse') {
         const rx = parseFloat(el.getAttribute('rx') || '0')
         const ry = parseFloat(el.getAttribute('ry') || '0')
-        el.setAttribute('cx', String(nx + rx))
-        el.setAttribute('cy', String(ny + ry))
+        el.setAttribute('cx', String(sx + rx))
+        el.setAttribute('cy', String(sy + ry))
       } else if (el.tagName === 'line') {
         const x1 = parseFloat(el.getAttribute('x1') || '0')
         const y1 = parseFloat(el.getAttribute('y1') || '0')
         const x2 = parseFloat(el.getAttribute('x2') || '0')
         const y2 = parseFloat(el.getAttribute('y2') || '0')
         const cur = { x: Math.min(x1, x2), y: Math.min(y1, y2) }
-        const dx = nx - cur.x
-        const dy = ny - cur.y
+        const dx = sx - cur.x
+        const dy = sy - cur.y
         el.setAttribute('x1', String(x1 + dx))
         el.setAttribute('y1', String(y1 + dy))
         el.setAttribute('x2', String(x2 + dx))
@@ -325,6 +358,109 @@ export const useEditorStore = defineStore('editor', {
       }
       const svg = doc.documentElement
       this.xml = new XMLSerializer().serializeToString(svg)
+    },
+    // Grouping
+    groupSelected() {
+      if (!this.selectedId) return null
+      const before = this.xml
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const svg = doc.documentElement
+      const el = doc.getElementById(this.selectedId)
+      if (!el || el.parentNode === svg && el.tagName === 'g') return null
+      const parent = el.parentNode
+      const g = doc.createElement('g')
+      const gid = this._genId('group')
+      g.setAttribute('id', gid)
+      parent.replaceChild(g, el)
+      g.appendChild(el)
+      this.xml = new XMLSerializer().serializeToString(svg)
+      this.undoStack.push(before)
+      this.redoStack = []
+      this.selectedId = el.getAttribute('id') // keep selection on child
+      return gid
+    },
+    ungroupSelected() {
+      if (!this.selectedId) return
+      const before = this.xml
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const svg = doc.documentElement
+      const el = doc.getElementById(this.selectedId)
+      if (!el) return
+      let group = null
+      if (el.tagName === 'g') group = el
+      else if (el.parentNode && el.parentNode.tagName === 'g') group = el.parentNode
+      if (!group) return
+      const parent = group.parentNode
+      while (group.firstChild) {
+        parent.insertBefore(group.firstChild, group)
+      }
+      parent.removeChild(group)
+      this.xml = new XMLSerializer().serializeToString(svg)
+      this.undoStack.push(before)
+      this.redoStack = []
+    },
+    // Z-order
+    _reorderSelected(direction) {
+      if (!this.selectedId) return
+      const before = this.xml
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const el = doc.getElementById(this.selectedId)
+      if (!el || !el.parentNode) return
+      const parent = el.parentNode
+      const siblings = Array.from(parent.children)
+      const idx = siblings.indexOf(el)
+      if (idx === -1) return
+      if (direction === 'front' && el.nextSibling) parent.appendChild(el)
+      else if (direction === 'back' && el.previousSibling) parent.insertBefore(el, parent.firstChild)
+      else if (direction === 'forward' && el.nextSibling) parent.insertBefore(el.nextSibling, el)
+      else if (direction === 'backward' && el.previousSibling) parent.insertBefore(el, el.previousSibling)
+      else return
+      this.xml = new XMLSerializer().serializeToString(doc.documentElement)
+      this.undoStack.push(before)
+      this.redoStack = []
+    },
+    bringToFront() { this._reorderSelected('front') },
+    sendToBack() { this._reorderSelected('back') },
+    bringForward() { this._reorderSelected('forward') },
+    sendBackward() { this._reorderSelected('backward') },
+    // Path conversion (MVP: rect, line)
+    convertSelectedToPath() {
+      if (!this.selectedId) return
+      const before = this.xml
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const el = doc.getElementById(this.selectedId)
+      if (!el) return
+      const tag = el.tagName
+      const id = el.getAttribute('id')
+      const parent = el.parentNode
+      const path = doc.createElement('path')
+      path.setAttribute('id', id)
+      // carry over styling
+      ;['fill','stroke','stroke-width','opacity'].forEach(a => {
+        if (el.hasAttribute(a)) path.setAttribute(a, el.getAttribute(a))
+      })
+      if (tag === 'rect') {
+        const x = parseFloat(el.getAttribute('x') || '0')
+        const y = parseFloat(el.getAttribute('y') || '0')
+        const w = parseFloat(el.getAttribute('width') || '0')
+        const h = parseFloat(el.getAttribute('height') || '0')
+        const d = `M ${x} ${y} L ${x + w} ${y} L ${x + w} ${y + h} L ${x} ${y + h} Z`
+        path.setAttribute('d', d)
+      } else if (tag === 'line') {
+        const x1 = parseFloat(el.getAttribute('x1') || '0')
+        const y1 = parseFloat(el.getAttribute('y1') || '0')
+        const x2 = parseFloat(el.getAttribute('x2') || '0')
+        const y2 = parseFloat(el.getAttribute('y2') || '0')
+        const d = `M ${x1} ${y1} L ${x2} ${y2}`
+        path.setAttribute('d', d)
+        path.setAttribute('fill', 'none')
+      } else {
+        return
+      }
+      parent.replaceChild(path, el)
+      this.xml = new XMLSerializer().serializeToString(doc.documentElement)
+      this.undoStack.push(before)
+      this.redoStack = []
     },
     exportXml(pretty = false) {
       return exportSvg(this.xml, { pretty })
