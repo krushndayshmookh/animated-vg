@@ -3,6 +3,10 @@ import { importSvg, exportSvg } from 'src/services/svg-io'
 
 export const useEditorStore = defineStore('editor', {
   state: () => ({
+    sidebarLeftOpen: true,
+    sidebarRightOpen: true,
+    sidebarBottomOpen: true,
+
     xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"></svg>',
     metadata: { title: '', viewBox: '0 0 800 600', size: { w: 800, h: 600 } },
     activeTool: 'select',
@@ -16,6 +20,16 @@ export const useEditorStore = defineStore('editor', {
     showGrid: false,
   }),
   actions: {
+    toggleSidebarLeft() {
+      this.sidebarLeftOpen = !this.sidebarLeftOpen
+    },
+    toggleSidebarRight() {
+      this.sidebarRightOpen = !this.sidebarRightOpen
+    },
+    toggleSidebarBottom() {
+      this.sidebarBottomOpen = !this.sidebarBottomOpen
+    },
+
     // Settings
     setSnap(enabled, size) {
       this.snapEnabled = !!enabled

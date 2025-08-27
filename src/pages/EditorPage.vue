@@ -1,77 +1,105 @@
 <template>
   <q-page class="column" data-test="editor-page">
-    <EditorToolbar
-      @toggle-left="leftOpen = !leftOpen"
-      @toggle-right="rightOpen = !rightOpen"
-      @toggle-bottom="bottomOpen = !bottomOpen"
+
+    <!-- floating left toolbar -->
+
+    <div class="absolute-left">
+      <q-card class="column q-gutter-xs q-ma-sm">
+        <q-btn round flat class="" icon="home" />
+        <q-btn round flat class="" icon="home" />
+        <q-btn round flat class="" icon="home" />
+      </q-card>
+    </div>
+
+    <!-- floating right toolbar -->
+
+    <div class="absolute-right">
+      <q-card class="column q-gutter-xs q-ma-sm">
+        <q-btn round flat class="" icon="person" />
+        <q-btn round flat class="" icon="person" />
+        <q-btn round flat class="" icon="person" />
+      </q-card>
+    </div>
+
+    <!-- floating bottom toolbar -->
+
+    <div class="absolute-bottom">
+      <q-card class="row q-gutter-xs q-ma-sm">
+        <q-btn round flat class="" icon="timeline" />
+        <q-btn round flat class="" icon="timeline" />
+        <q-btn round flat class="" icon="timeline" />
+      </q-card>
+    </div>
+
+ 
+
+    <!-- <EditorToolbar
+      @toggle-left="editorStore.toggleSidebarLeft"
+      @toggle-right="editorStore.toggleSidebarRight"
+      @toggle-bottom="editorStore.toggleSidebarBottom"
       @open="onOpen"
       @save="onSave"
       @set-tool="onSetTool"
     />
 
-    <q-splitter v-model="hSplit" unit="px" style="height: calc(100vh - 50px)">
-      <template #before>
-        <q-drawer :model-value="leftOpen" side="left" bordered data-test="left-panel">
-          <EditorLayers />
-        </q-drawer>
-      </template>
+    <q-drawer
+      :model-value="editorStore.sidebarLeftOpen"
+      side="left"
+      bordered
+      data-test="left-panel"
+    >
+      <EditorLayers />
+    </q-drawer>
 
-      <template #after>
-        <q-splitter v-model="vSplit" horizontal>
-          <template #before>
-            <div class="fit">
-              <EditorCanvas />
-            </div>
-          </template>
-          <template #after>
-            <q-slide-transition>
-              <div v-show="bottomOpen" class="bg-grey-1" style="height: 200px">
-                <EditorTimeline />
-              </div>
-            </q-slide-transition>
-          </template>
-        </q-splitter>
+    <div class="fit">
+      <EditorCanvas />
+    </div>
 
-        <q-drawer :model-value="rightOpen" side="right" bordered data-test="right-panel">
-          <EditorInspector />
-        </q-drawer>
-      </template>
-    </q-splitter>
+    <q-slide-transition>
+      <div v-show="editorStore.sidebarBottomOpen" class="bg-grey-1" style="height: 200px">
+        <EditorTimeline />
+      </div>
+    </q-slide-transition>
+
+    <q-drawer
+      :model-value="editorStore.sidebarRightOpen"
+      side="right"
+      bordered
+      data-test="right-panel"
+    >
+      <EditorInspector />
+    </q-drawer> -->
   </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+// import { ref } from 'vue'
 import { useEditorStore } from 'src/stores/editor-store.js'
-import { openDialog, saveDialog } from 'src/services/fs-client'
-import EditorToolbar from 'components/editor/EditorToolbar.vue'
-import EditorCanvas from 'components/editor/EditorCanvas.vue'
-import EditorInspector from 'components/editor/EditorInspector.vue'
-import EditorLayers from 'components/editor/EditorLayers.vue'
-import EditorTimeline from 'components/editor/EditorTimeline.vue'
+// import { openDialog, saveDialog } from 'src/services/fs-client'
+// import EditorToolbar from 'components/editor/EditorToolbar.vue'
+// import EditorCanvas from 'components/editor/EditorCanvas.vue'
+// import EditorInspector from 'components/editor/EditorInspector.vue'
+// import EditorLayers from 'components/editor/EditorLayers.vue'
+// import EditorTimeline from 'components/editor/EditorTimeline.vue'
 
-const store = useEditorStore()
+const editorStore = useEditorStore()
 
-const leftOpen = ref(true)
-const rightOpen = ref(true)
-const bottomOpen = ref(true)
+// const hSplit = ref(250) // left panel width in px
+// const vSplit = ref(70) // % height above timeline
 
-const hSplit = ref(250) // left panel width in px
-const vSplit = ref(70) // % height above timeline
+// async function onOpen() {
+//   const result = await openDialog()
+//   if (result?.contents) {
+//     editorStore.loadFromXml(result.contents)
+//   }
+// }
 
-async function onOpen() {
-  const result = await openDialog()
-  if (result?.contents) {
-    store.loadFromXml(result.contents)
-  }
-}
+// async function onSave() {
+//   const xml = editorStore.exportXml()
+//   await saveDialog(xml)
+// }
 
-async function onSave() {
-  const xml = store.exportXml()
-  await saveDialog(xml)
-}
-
-function onSetTool(tool) {
-  store.setActiveTool(tool)
-}
+// function onSetTool(tool) {
+//   editorStore.setActiveTool(tool)
+// }
 </script>

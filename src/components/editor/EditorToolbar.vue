@@ -1,14 +1,5 @@
 <template>
   <q-toolbar class="bg-grey-2 text-dark" data-test="editor-toolbar">
-    <q-btn
-      flat
-      round
-      dense
-      icon="menu"
-      data-test="toolbar-toggle-left"
-      @click="$emit('toggle-left')"
-    />
-    <q-toolbar-title>Editor</q-toolbar-title>
     <q-btn flat dense icon="folder_open" data-test="toolbar-open" @click="$emit('open')" />
     <q-btn flat dense icon="save" data-test="toolbar-save" @click="$emit('save')" />
     <q-btn flat dense icon="mouse" data-test="tool-select" @click="$emit('set-tool', 'select')" />
