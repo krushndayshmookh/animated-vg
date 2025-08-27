@@ -31,7 +31,7 @@
       </q-card>
     </div>
 
- 
+
 
     <!-- <EditorToolbar
       @toggle-left="editorStore.toggleSidebarLeft"
@@ -74,7 +74,7 @@
 
 <script setup>
 // import { ref } from 'vue'
-import { useEditorStore } from 'src/stores/editor-store.js'
+// import { useEditorStore } from 'src/stores/editor-store.js'
 // import { openDialog, saveDialog } from 'src/services/fs-client'
 // import EditorToolbar from 'components/editor/EditorToolbar.vue'
 // import EditorCanvas from 'components/editor/EditorCanvas.vue'
@@ -82,7 +82,7 @@ import { useEditorStore } from 'src/stores/editor-store.js'
 // import EditorLayers from 'components/editor/EditorLayers.vue'
 // import EditorTimeline from 'components/editor/EditorTimeline.vue'
 
-const editorStore = useEditorStore()
+// const editorStore = useEditorStore()
 
 // const hSplit = ref(250) // left panel width in px
 // const vSplit = ref(70) // % height above timeline
