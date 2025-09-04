@@ -7,7 +7,8 @@ export const useEditorStore = defineStore('editor', {
     sidebarRightOpen: false,
     sidebarBottomOpen: false,
 
-    xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"></svg>',
+    // xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"></svg>',
+    xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="arrow-circle-right"><rect width="24" height="24" transform="rotate(-90 12 12)" opacity="0"/><path d="M17 12v-.09a.88.88 0 0 0-.06-.28.72.72 0 0 0-.11-.19 1 1 0 0 0-.09-.13l-2.86-3a1 1 0 0 0-1.45 1.38L13.66 11H8a1 1 0 0 0 0 2h5.59l-1.3 1.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3-3a1 1 0 0 0 .21-.32A1 1 0 0 0 17 12z"/><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/></g></g></svg>',
     metadata: { title: '', viewBox: '0 0 800 600', size: { w: 800, h: 600 } },
     activeTool: 'select',
     selectedId: null,
@@ -18,6 +19,10 @@ export const useEditorStore = defineStore('editor', {
     snapEnabled: false,
     snapSize: 10,
     showGrid: false,
+
+    // Canvas settings
+    canvasWidth: 800,
+    canvasHeight: 600,
   }),
   actions: {
     toggleSidebarLeft() {
@@ -37,6 +42,23 @@ export const useEditorStore = defineStore('editor', {
     },
     setShowGrid(show) {
       this.showGrid = !!show
+    },
+
+    // Canvas settings
+    setCanvasSize(width, height) {
+      this.canvasWidth = Math.max(100, Math.min(10000, width))
+      this.canvasHeight = Math.max(100, Math.min(10000, height))
+      this.metadata.size = { w: this.canvasWidth, h: this.canvasHeight }
+      this.updateSvgViewBox()
+    },
+
+    updateSvgViewBox() {
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const svg = doc.documentElement
+      svg.setAttribute('viewBox', `0 0 ${this.canvasWidth} ${this.canvasHeight}`)
+      svg.setAttribute('width', this.canvasWidth)
+      svg.setAttribute('height', this.canvasHeight)
+      this.xml = new XMLSerializer().serializeToString(svg)
     },
     _snap(n) {
       if (!this.snapEnabled) return n
