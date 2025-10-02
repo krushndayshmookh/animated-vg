@@ -397,6 +397,10 @@ let resizeObserver = null
 onMounted(() => {
   updateCanvasSize()
 
+  // if(store.json) {
+  //   console.log('Initial JSON:', store.json)
+  // }
+
   // Set up resize observer
   if (scrollContainer.value) {
     resizeObserver = new ResizeObserver(() => {

@@ -8,6 +8,7 @@ export const useEditorStore = defineStore('editor', {
     sidebarBottomOpen: false,
 
     xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"></svg>',
+    json: null,
     metadata: { title: '', viewBox: '0 0 400 400', size: { w: 400, h: 400 } },
     activeTool: 'select',
     selectedId: null,
@@ -65,10 +66,11 @@ export const useEditorStore = defineStore('editor', {
       const s = this.snapSize || 10
       return Math.round(n / s) * s
     },
-    loadFromXml(xml) {
-      const { metadata } = importSvg(xml)
-      console.log('Import metadata:', metadata)
+    loadFromXml(svgFile) {
+      const { xml, json, metadata } = importSvg(svgFile)
+
       this.xml = xml
+      this.json = json
       this.metadata = {
         title: metadata.title,
         viewBox: metadata.viewBox,
@@ -540,7 +542,7 @@ export const useEditorStore = defineStore('editor', {
       this.undoStack.push(before)
       this.redoStack = []
     },
-    exportXml(pretty = false) {
+    exportXml(pretty = true) {
       return exportSvg(this.xml, { pretty })
     },
     // M6: SMIL parse/list/update (animate only for MVP)

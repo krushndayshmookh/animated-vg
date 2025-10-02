@@ -147,12 +147,7 @@ const leftToolbarButtons = computed(() => [
     tooltip: 'Add Line',
     isActive: editorStore.activeTool === 'line',
   },
-  {
-    name: 'reset-canvas',
-    icon: 'eva-refresh-outline',
-    tooltip: 'Reset Canvas (400x400)',
-    isActive: false,
-  },
+
 ])
 
 const rightToolbarButtons = computed(() => [
@@ -179,6 +174,12 @@ const rightToolbarButtons = computed(() => [
     name: 'save',
     icon: 'eva-save-outline',
     tooltip: 'Save',
+    isActive: false,
+  },
+   {
+    name: 'reset-canvas',
+    icon: 'eva-trash-outline',
+    tooltip: 'Reset Canvas (400x400)',
     isActive: false,
   },
   {
