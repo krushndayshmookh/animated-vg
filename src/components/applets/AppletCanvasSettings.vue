@@ -1,7 +1,5 @@
 <template>
-  <div class="canvas-settings" data-test="canvas-settings">
-    <div class="text-subtitle2 q-mb-sm">Canvas Settings</div>
-
+  <DrawerApplet name="Canvas Settings">
     <div class="row q-col-gutter-xs">
       <div class="col-6">
         <q-input
@@ -44,10 +42,12 @@
         @update:model-value="toggleGrid"
       />
     </div>
-  </div>
+  </DrawerApplet>
 </template>
 
 <script setup>
+import DrawerApplet from 'components/layout/LayoutDrawerApplet.vue'
+
 import { ref, watch } from 'vue'
 import { useEditorStore } from 'src/stores/editor-store.js'
 

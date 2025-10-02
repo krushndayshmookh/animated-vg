@@ -13,28 +13,22 @@
 
         <q-toolbar-title> AnimatedVG </q-toolbar-title>
 
-        <q-btn
-          flat
-          round
-          dense
+        <LayoutButton
+          :active="editorStore.sidebarLeftOpen"
           icon="eva-arrowhead-left-outline"
           data-test="toolbar-toggle-left"
           @click="editorStore.toggleSidebarLeft"
         />
 
-        <q-btn
-          flat
-          round
-          dense
+        <LayoutButton
+          :active="editorStore.sidebarRightOpen"
           icon="eva-arrowhead-right-outline"
           data-test="toolbar-toggle-right"
           @click="editorStore.toggleSidebarRight"
         />
 
-        <q-btn
-          flat
-          round
-          dense
+        <LayoutButton
+          :active="editorStore.sidebarBottomOpen"
           icon="eva-arrowhead-down-outline"
           data-test="toolbar-toggle-bottom"
           @click="editorStore.toggleSidebarBottom"
@@ -48,7 +42,7 @@
       bordered
       data-test="left-panel"
     >
-      <p>Left Sidebar Content</p>
+      <LayoutDrawerLeft />
     </q-drawer>
 
     <q-drawer
@@ -57,21 +51,25 @@
       bordered
       data-test="right-panel"
     >
-      <p>Right Sidebar Content</p>
+      <LayoutDrawerRight />
     </q-drawer>
 
     <q-page-container>
       <router-view />
     </q-page-container>
 
-    <q-footer v-model="editorStore.sidebarBottomOpen">
-      <p>Footer Content</p>
+    <q-footer v-model="editorStore.sidebarBottomOpen" class="bg-white bordered">
+      <LayoutDrawerBottom />
     </q-footer>
   </q-layout>
 </template>
 
 <script setup>
 import { useEditorStore } from 'src/stores/editor-store.js'
+import LayoutButton from 'src/components/layout/LayoutButton.vue'
+import LayoutDrawerLeft from 'src/components/layout/LayoutDrawerLeft.vue'
+import LayoutDrawerRight from 'src/components/layout/LayoutDrawerRight.vue'
+import LayoutDrawerBottom from 'src/components/layout/LayoutDrawerBottom.vue'
 
 const editorStore = useEditorStore()
 </script>

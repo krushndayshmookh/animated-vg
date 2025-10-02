@@ -3,34 +3,17 @@
     <!-- Main Editor Layout -->
     <div class="editor-layout">
       <!-- Left Sidebar -->
-      <q-drawer
-        :model-value="editorStore.sidebarLeftOpen"
-        side="left"
-        bordered
-        data-test="left-panel"
-        :width="300"
-      >
-        <div class="sidebar-content">
-          <EditorCanvasSettings />
-          <EditorLayers />
-        </div>
-      </q-drawer>
+
+
+
 
       <!-- Main Canvas Area -->
       <div class="canvas-area">
         <EditorCanvas :zoom="zoom" @zoom-in="zoomIn" @zoom-out="zoomOut" />
       </div>
 
-      <!-- Right Sidebar -->
-      <q-drawer
-        :model-value="editorStore.sidebarRightOpen"
-        side="right"
-        bordered
-        data-test="right-panel"
-        :width="300"
-      >
-        <EditorInspector />
-      </q-drawer>
+
+
     </div>
 
     <!-- Floating Toolbars (Overlay) -->
@@ -84,9 +67,7 @@ import { useEditorStore } from 'src/stores/editor-store.js'
 import { saveDialog } from 'src/services/fs-client'
 import EditorToolbar from 'src/components/editor/EditorToolbar.vue'
 import EditorCanvas from 'components/editor/EditorCanvas.vue'
-import EditorInspector from 'components/editor/EditorInspector.vue'
-import EditorLayers from 'components/editor/EditorLayers.vue'
-import EditorCanvasSettings from 'components/editor/EditorCanvasSettings.vue'
+
 
 const editorStore = useEditorStore()
 

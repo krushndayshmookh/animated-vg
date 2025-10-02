@@ -1,6 +1,5 @@
 <template>
-  <div class="q-pa-sm" data-test="editor-inspector">
-    <div class="text-subtitle2 q-mb-sm">Inspector</div>
+  <DrawerApplet name="Inspector">
     <div v-if="selected">
       <div class="text-caption q-mb-sm">Selected: {{ selected.tag }}</div>
       <q-input
@@ -171,10 +170,12 @@
       </div>
     </div>
     <div v-else class="text-grey">No selection</div>
-  </div>
+  </DrawerApplet>
 </template>
 
 <script setup>
+import DrawerApplet from 'components/layout/LayoutDrawerApplet.vue'
+
 import { ref, watchEffect } from 'vue'
 import { useEditorStore } from 'src/stores/editor-store.js'
 
