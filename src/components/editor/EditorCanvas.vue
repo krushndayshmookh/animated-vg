@@ -22,21 +22,21 @@
             <div v-html="safeSvgHtml"></div>
 
             <!-- Selection Outline -->
-            <div
+            <!-- <div
               v-if="selectionBox"
               class="selection-outline"
               :style="selectionStyle"
               data-test="selection-outline"
               @mousedown.stop="onSelectionMouseDown"
-            />
+            /> -->
 
             <!-- Rubber Band -->
-            <div
+            <!-- <div
               v-if="rubberBand"
               class="rubber-outline"
               :style="rubberStyle"
               data-test="rubber-band"
-            />
+            /> -->
           </div>
         </div>
       </div>
@@ -105,23 +105,40 @@ const canvasBackground = ref(null)
 const svgContainer = ref(null)
 
 // Canvas dimensions and zoom
-const canvasWidth = computed(() => store.canvasWidth)
-const canvasHeight = computed(() => store.canvasHeight)
+const canvasWidth = computed(() => {
+  console.log('Canvas width computed:', store.canvasWidth)
+  return store.canvasWidth
+})
+const canvasHeight = computed(() => {
+  console.log('Canvas height computed:', store.canvasHeight)
+  return store.canvasHeight
+})
+
+// Pan and zoom state
+const panX = ref(0)
+const panY = ref(0)
+const isPanning = ref(false)
+const lastPanPoint = ref({ x: 0, y: 0 })
+const spacePressed = ref(false)
 const scrollX = ref(0)
 const scrollY = ref(0)
 
-// Drawing state
-const drawing = ref(false)
-const start = ref({ x: 0, y: 0 })
-const current = ref({ x: 0, y: 0 })
-const draggingSelection = ref(false)
-const dragOffset = ref({ dx: 0, dy: 0 })
+// Drawing state - commented out for simple canvas
+// const drawing = ref(false)
+// const start = ref({ x: 0, y: 0 })
+// const current = ref({ x: 0, y: 0 })
+// const draggingSelection = ref(false)
+// const dragOffset = ref({ dx: 0, dy: 0 })
 
 // Computed styles
 const canvasWrapperStyle = computed(() => ({
   width: `${canvasWidth.value * props.zoom}px`,
   height: `${canvasHeight.value * props.zoom}px`,
-  position: 'relative',
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: `translate(calc(-50% + ${panX.value}px), calc(-50% + ${panY.value}px))`,
+  transition: isPanning.value ? 'none' : 'transform 0.1s ease-out',
 }))
 
 const canvasBackgroundStyle = computed(() => ({
@@ -130,6 +147,11 @@ const canvasBackgroundStyle = computed(() => ({
   position: 'relative',
   background: '#f8f9fa',
   border: '1px solid #e0e0e0',
+  cursor: isPanning.value
+    ? 'grabbing'
+    : spacePressed.value || store.activeTool === 'pan'
+      ? 'grab'
+      : 'default',
 }))
 
 const canvasBorderStyle = computed(() => ({
@@ -153,49 +175,53 @@ const svgContainerStyle = computed(() => ({
   zIndex: 2,
 }))
 
-const selectionBox = computed(() => {
-  if (!store.selectedId) return null
-  const rect = store.getRectById(store.selectedId)
-  return rect
-})
+// Commented out for simple canvas - no selection functionality
+// const selectionBox = computed(() => {
+//   if (!store.selectedId) return null
+//   const rect = store.getRectById(store.selectedId)
+//   return rect
+// })
 
-const selectionStyle = computed(() => {
-  if (!selectionBox.value) return {}
-  const { x, y, width, height } = selectionBox.value
-  return {
-    position: 'absolute',
-    left: `${x * props.zoom}px`,
-    top: `${y * props.zoom}px`,
-    width: `${width * props.zoom}px`,
-    height: `${height * props.zoom}px`,
-    pointerEvents: 'auto',
-    zIndex: 3,
-  }
-})
+// Commented out for simple canvas
+// const selectionStyle = computed(() => {
+//   if (!selectionBox.value) return {}
+//   const { x, y, width, height } = selectionBox.value
+//   return {
+//     position: 'absolute',
+//     left: `${x * props.zoom}px`,
+//     top: `${y * props.zoom}px`,
+//     width: `${width * props.zoom}px`,
+//     height: `${height * props.zoom}px`,
+//     pointerEvents: 'auto',
+//     zIndex: 3,
+//   }
+// })
 
-const rubberBand = computed(() => {
-  if (!drawing.value) return null
-  const x = Math.min(start.value.x, current.value.x)
-  const y = Math.min(start.value.y, current.value.y)
-  const w = Math.abs(current.value.x - start.value.x)
-  const h = Math.abs(current.value.y - start.value.y)
-  if (w < 2 || h < 2) return null
-  return { x, y, width: w, height: h }
-})
+// Commented out for simple canvas
+// const rubberBand = computed(() => {
+//   if (!drawing.value) return null
+//   const x = Math.min(start.value.x, current.value.x)
+//   const y = Math.min(start.value.y, current.value.y)
+//   const w = Math.abs(current.value.x - start.value.x)
+//   const h = Math.abs(current.value.y - start.value.y)
+//   if (w < 2 || h < 2) return null
+//   return { x, y, width: w, height: h }
+// })
 
-const rubberStyle = computed(() => {
-  if (!rubberBand.value) return {}
-  const { x, y, width, height } = rubberBand.value
-  return {
-    position: 'absolute',
-    left: `${x * props.zoom}px`,
-    top: `${y * props.zoom}px`,
-    width: `${width * props.zoom}px`,
-    height: `${height * props.zoom}px`,
-    pointerEvents: 'none',
-    zIndex: 3,
-  }
-})
+// Commented out for simple canvas
+// const rubberStyle = computed(() => {
+//   if (!rubberBand.value) return {}
+//   const { x, y, width, height } = rubberBand.value
+//   return {
+//     position: 'absolute',
+//     left: `${x * props.zoom}px`,
+//     top: `${y * props.zoom}px`,
+//     width: `${width * props.zoom}px`,
+//     height: `${height * props.zoom}px`,
+//     pointerEvents: 'none',
+//     zIndex: 3,
+//   }
+// })
 
 // Zoom functions are now handled by parent component
 
@@ -204,16 +230,16 @@ function updateCanvasSize() {
   store.updateSvgViewBox()
 }
 
-// Coordinate conversion
-function toLocalCoords(evt) {
-  const svgEl = svgContainer.value
-  if (!svgEl) return { x: 0, y: 0 }
+// Coordinate conversion - commented out for simple canvas
+// function toLocalCoords(evt) {
+//   const svgEl = svgContainer.value
+//   if (!svgEl) return { x: 0, y: 0 }
 
-  const rect = svgEl.getBoundingClientRect()
-  const x = (evt.clientX - rect.left) / props.zoom
-  const y = (evt.clientY - rect.top) / props.zoom
-  return { x, y }
-}
+//   const rect = svgEl.getBoundingClientRect()
+//   const x = (evt.clientX - rect.left) / props.zoom
+//   const y = (evt.clientY - rect.top) / props.zoom
+//   return { x, y }
+// }
 
 // Event handlers
 function onScroll() {
@@ -225,131 +251,171 @@ function onScroll() {
 function onWheel(evt) {
   if (evt.ctrlKey || evt.metaKey) {
     evt.preventDefault()
+
+    // Get mouse position relative to container
+    const container = scrollContainer.value
+    if (!container) return
+
+    const rect = container.getBoundingClientRect()
+    const mouseX = evt.clientX - rect.left
+    const mouseY = evt.clientY - rect.top
+
+    // Calculate zoom point in canvas coordinates
+    const canvasMouseX = (mouseX - panX.value) / props.zoom
+    const canvasMouseY = (mouseY - panY.value) / props.zoom
+
     // Emit zoom events to parent component
     if (evt.deltaY < 0) {
       emit('zoom-in')
     } else {
       emit('zoom-out')
     }
+
+    // Adjust pan to keep mouse position stable after zoom
+    // This needs to be done in nextTick to get the new zoom value
+    nextTick(() => {
+      const newZoom = props.zoom
+
+      // Adjust pan position to keep mouse point stable
+      panX.value = mouseX - canvasMouseX * newZoom
+      panY.value = mouseY - canvasMouseY * newZoom
+    })
   }
 }
 
 function onMouseDown(evt) {
+  // Pan mode: Middle mouse button, spacebar + left click, or pan tool + left click
   if (
-    store.activeTool === 'rect' ||
-    store.activeTool === 'ellipse' ||
-    store.activeTool === 'line'
+    evt.button === 1 ||
+    (evt.button === 0 && spacePressed.value) ||
+    (evt.button === 0 && store.activeTool === 'pan')
   ) {
-    drawing.value = true
-    start.value = toLocalCoords(evt)
-    current.value = { ...start.value }
+    evt.preventDefault()
+    isPanning.value = true
+    lastPanPoint.value = { x: evt.clientX, y: evt.clientY }
+
+    // Add global mouse event listeners
+    document.addEventListener('mousemove', onDocumentMouseMove)
+    document.addEventListener('mouseup', onDocumentMouseUp)
   }
 }
 
 function onMouseMove(evt) {
-  if (drawing.value) {
-    current.value = toLocalCoords(evt)
-  }
-  if (draggingSelection.value && store.selectedId) {
-    const p = toLocalCoords(evt)
-    const nx = p.x - dragOffset.value.dx
-    const ny = p.y - dragOffset.value.dy
-    store.moveSelectedTo(nx, ny)
+  // Handle panning when middle mouse is held or shift+drag
+  if (isPanning.value) {
+    evt.preventDefault()
+    onDocumentMouseMove(evt)
   }
 }
 
 function onMouseUp(evt) {
-  if (
-    drawing.value &&
-    (store.activeTool === 'rect' || store.activeTool === 'ellipse' || store.activeTool === 'line')
-  ) {
-    const end = toLocalCoords(evt)
-    const w = end.x - start.value.x
-    const h = end.y - start.value.y
-    if (store.activeTool === 'rect') {
-      if (Math.abs(w) > 2 && Math.abs(h) > 2) store.addRect(start.value.x, start.value.y, w, h)
-    } else if (store.activeTool === 'ellipse') {
-      if (Math.abs(w) > 2 && Math.abs(h) > 2) store.addEllipse(start.value.x, start.value.y, w, h)
-    } else if (store.activeTool === 'line') {
-      if (Math.abs(w) > 2 || Math.abs(h) > 2)
-        store.addLine(start.value.x, start.value.y, end.x, end.y)
+  // Stop panning
+  if (isPanning.value && (evt.button === 1 || evt.button === 0)) {
+    evt.preventDefault()
+    stopPanning()
+  }
+}
+
+// Global mouse event handlers for smooth panning
+function onDocumentMouseMove(evt) {
+  if (!isPanning.value) return
+
+  const deltaX = evt.clientX - lastPanPoint.value.x
+  const deltaY = evt.clientY - lastPanPoint.value.y
+
+  panX.value += deltaX
+  panY.value += deltaY
+
+  lastPanPoint.value = { x: evt.clientX, y: evt.clientY }
+}
+
+function onDocumentMouseUp() {
+  if (isPanning.value) {
+    stopPanning()
+  }
+}
+
+function stopPanning() {
+  isPanning.value = false
+  document.removeEventListener('mousemove', onDocumentMouseMove)
+  document.removeEventListener('mouseup', onDocumentMouseUp)
+}
+
+// Keyboard event handlers for spacebar panning
+function onKeyDown(evt) {
+  if (evt.code === 'Space' && !spacePressed.value) {
+    evt.preventDefault()
+    spacePressed.value = true
+  }
+}
+
+function onKeyUp(evt) {
+  if (evt.code === 'Space') {
+    evt.preventDefault()
+    spacePressed.value = false
+    // Stop panning if space is released
+    if (isPanning.value) {
+      stopPanning()
     }
-    drawing.value = false
-  }
-  if (draggingSelection.value) {
-    draggingSelection.value = false
   }
 }
 
-function onClick(evt) {
-  if (store.activeTool !== 'select') return
-  const p = toLocalCoords(evt)
-  store.setSelectionByPoint(p.x, p.y)
+function onClick() {
+  // Commented out for simple canvas - no selection functionality
+  // if (store.activeTool !== 'select') return
+  // const p = toLocalCoords(evt)
+  // store.setSelectionByPoint(p.x, p.y)
 }
 
-function onSelectionMouseDown(evt) {
-  if (store.activeTool !== 'select' || !selectionBox.value) return
-  const p = toLocalCoords(evt)
-  dragOffset.value = { dx: p.x - selectionBox.value.x, dy: p.y - selectionBox.value.y }
-  draggingSelection.value = true
-}
+// Commented out for simple canvas - no selection functionality
+// function onSelectionMouseDown(evt) {
+//   if (store.activeTool !== 'select' || !selectionBox.value) return
+//   const p = toLocalCoords(evt)
+//   dragOffset.value = { dx: p.x - selectionBox.value.x, dy: p.y - selectionBox.value.y }
+//   draggingSelection.value = true
+// }
 
-// Watch for canvas dimension changes and center
+// Watch for canvas dimension changes and reset pan position
 watch([canvasWidth, canvasHeight], () => {
   nextTick(() => {
-    centerCanvas()
+    // Reset pan position when canvas size changes (e.g., import new file)
+    panX.value = 0
+    panY.value = 0
   })
 })
 
-// Resize observer for centering
+// Resize observer for responsive behavior
 let resizeObserver = null
 
-// Initialize canvas dimensions from store
+// Initialize canvas
 onMounted(() => {
   updateCanvasSize()
-  // Center the canvas initially
-  nextTick(() => {
-    centerCanvas()
 
-    // Set up resize observer
-    if (scrollContainer.value) {
-      resizeObserver = new ResizeObserver(() => {
-        centerCanvas()
-      })
-      resizeObserver.observe(scrollContainer.value)
-    }
-  })
+  // Set up resize observer
+  if (scrollContainer.value) {
+    resizeObserver = new ResizeObserver(() => {
+      // Container resized, could adjust pan if needed
+    })
+    resizeObserver.observe(scrollContainer.value)
+  }
+
+  // Add keyboard event listeners for spacebar panning
+  document.addEventListener('keydown', onKeyDown)
+  document.addEventListener('keyup', onKeyUp)
 })
 
 onUnmounted(() => {
+  // Clean up event listeners and observers
   if (resizeObserver) {
     resizeObserver.disconnect()
   }
+
+  // Clean up global event listeners
+  document.removeEventListener('mousemove', onDocumentMouseMove)
+  document.removeEventListener('mouseup', onDocumentMouseUp)
+  document.removeEventListener('keydown', onKeyDown)
+  document.removeEventListener('keyup', onKeyUp)
 })
-
-// Center the canvas in the viewport (now handled by CSS flexbox)
-function centerCanvas() {
-  // With CSS flexbox centering, this function is mainly for scroll position updates
-  if (!scrollContainer.value) return
-
-  const container = scrollContainer.value
-  const containerWidth = container.clientWidth
-  const containerHeight = container.clientHeight
-
-  // Only center if canvas is larger than viewport
-  const canvasWidthPx = canvasWidth.value * props.zoom
-  const canvasHeightPx = canvasHeight.value * props.zoom
-
-  if (canvasWidthPx > containerWidth || canvasHeightPx > containerHeight) {
-    const centerX = Math.max(0, (canvasWidthPx - containerWidth) / 2)
-    const centerY = Math.max(0, (canvasHeightPx - containerHeight) / 2)
-
-    container.scrollLeft = centerX
-    container.scrollTop = centerY
-    scrollX.value = centerX
-    scrollY.value = centerY
-  }
-}
 </script>
 
 <style scoped>
@@ -363,7 +429,7 @@ function centerCanvas() {
 .canvas-scroll-area {
   height: 100%;
   width: 100%;
-  overflow: auto;
+  overflow: hidden; /* Hide scrollbars for infinite canvas feel */
   background: #f0f0f0;
   position: relative;
   background-image: radial-gradient(circle, #ccc 1px, transparent 1px);
@@ -371,16 +437,10 @@ function centerCanvas() {
   background-position:
     0 0,
     10px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.canvas-wrapper {
-  position: relative;
-  margin: 20px;
-  display: block;
-  flex-shrink: 0;
+.canvas-scroll-area:active {
+  cursor: grabbing;
 }
 
 .canvas-background {

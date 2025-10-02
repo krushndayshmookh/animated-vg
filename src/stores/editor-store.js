@@ -7,9 +7,8 @@ export const useEditorStore = defineStore('editor', {
     sidebarRightOpen: false,
     sidebarBottomOpen: false,
 
-    // xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"></svg>',
-    xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="arrow-circle-right"><rect width="24" height="24" transform="rotate(-90 12 12)" opacity="0"/><path d="M17 12v-.09a.88.88 0 0 0-.06-.28.72.72 0 0 0-.11-.19 1 1 0 0 0-.09-.13l-2.86-3a1 1 0 0 0-1.45 1.38L13.66 11H8a1 1 0 0 0 0 2h5.59l-1.3 1.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3-3a1 1 0 0 0 .21-.32A1 1 0 0 0 17 12z"/><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/></g></g></svg>',
-    metadata: { title: '', viewBox: '0 0 800 600', size: { w: 800, h: 600 } },
+    xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"></svg>',
+    metadata: { title: '', viewBox: '0 0 400 400', size: { w: 400, h: 400 } },
     activeTool: 'select',
     selectedId: null,
     _idCounter: 1,
@@ -21,8 +20,8 @@ export const useEditorStore = defineStore('editor', {
     showGrid: false,
 
     // Canvas settings
-    canvasWidth: 800,
-    canvasHeight: 600,
+    canvasWidth: 400,
+    canvasHeight: 400,
   }),
   persist: true,
   actions: {
@@ -68,10 +67,35 @@ export const useEditorStore = defineStore('editor', {
     },
     loadFromXml(xml) {
       const { metadata } = importSvg(xml)
+      console.log('Import metadata:', metadata)
       this.xml = xml
-      this.metadata = metadata
+      this.metadata = {
+        title: metadata.title,
+        viewBox: `0 0 ${metadata.size.w} ${metadata.size.h}`,
+        size: { w: metadata.size.w, h: metadata.size.h },
+      }
+      // Update canvas size to match imported SVG dimensions
+      this.canvasWidth = metadata.size.w
+      this.canvasHeight = metadata.size.h
+      console.log('Updated canvas size:', this.canvasWidth, this.canvasHeight)
       this.undoStack = []
       this.redoStack = []
+    },
+    resetCanvas() {
+      // Reset to 400x400 canvas with empty SVG
+      this.xml =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400"></svg>'
+      this.metadata = {
+        title: '',
+        viewBox: '0 0 400 400',
+        size: { w: 400, h: 400 },
+      }
+      this.canvasWidth = 400
+      this.canvasHeight = 400
+      this.selectedId = null
+      this.undoStack = []
+      this.redoStack = []
+      console.log('Canvas reset to 400x400')
     },
     setActiveTool(tool) {
       this.activeTool = tool

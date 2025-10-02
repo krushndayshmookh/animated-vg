@@ -5,8 +5,24 @@ export function importSvg(xml) {
   const svg = doc.documentElement
   const title = (doc.querySelector('svg > title')?.textContent || '').trim()
   const viewBox = svg.getAttribute('viewBox') || '0 0 800 600'
-  const w = Number(svg.getAttribute('width')) || 800
-  const h = Number(svg.getAttribute('height')) || 600
+
+  // Try to get width and height from attributes first
+  let w = parseFloat(svg.getAttribute('width')) || 0
+  let h = parseFloat(svg.getAttribute('height')) || 0
+
+  // If no explicit width/height, try to extract from viewBox
+  if (!w || !h) {
+    const viewBoxParts = viewBox.split(/\s+/)
+    if (viewBoxParts.length >= 4) {
+      w = w || parseFloat(viewBoxParts[2]) || 800
+      h = h || parseFloat(viewBoxParts[3]) || 600
+    } else {
+      w = w || 800
+      h = h || 600
+    }
+  }
+
+  console.log('SVG dimensions extracted:', { w, h, viewBox, title })
   return {
     svg,
     metadata: { title, viewBox, size: { w, h } },

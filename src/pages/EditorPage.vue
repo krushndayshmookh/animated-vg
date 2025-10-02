@@ -12,17 +12,11 @@
 
     <!-- Floating Toolbars (Overlay) -->
     <div class="toolbar-overlay">
-      <EditorToolbar side="left" :items="editToolbarButtons" @toolbar-click="handleToolbarClick" />
+      <EditorToolbar side="left" :items="leftToolbarButtons" @toolbar-click="handleToolbarClick" />
 
       <EditorToolbar
         side="right"
-        :items="[
-          { name: 'undo', icon: 'eva-undo-outline', tooltip: 'Undo' },
-          { name: 'redo', icon: 'eva-undo-outline', tooltip: 'Redo', iconFlip: true },
-          { name: 'save', icon: 'eva-save-outline', tooltip: 'Save' },
-          { name: 'toggle-left', icon: 'eva-menu-outline', tooltip: 'Toggle Layers' },
-          { name: 'toggle-right', icon: 'eva-settings-outline', tooltip: 'Toggle Inspector' },
-        ]"
+        :items="rightToolbarButtons"
         @toolbar-click="handleToolbarClick"
       />
 
@@ -56,9 +50,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useEditorStore } from 'src/stores/editor-store.js'
-import { saveDialog } from 'src/services/fs-client'
+import { saveDialog, openDialog } from 'src/services/fs-client'
 import EditorToolbar from 'src/components/editor/EditorToolbar.vue'
 import EditorCanvas from 'components/editor/EditorCanvas.vue'
 
@@ -94,6 +88,9 @@ function handleToolbarClick(item) {
     case 'toggle-right':
       editorStore.toggleSidebarRight()
       break
+    case 'import':
+      onOpen()
+      break
     case 'undo':
       // TODO: Implement undo
       break
@@ -106,6 +103,9 @@ function handleToolbarClick(item) {
     case 'select-item':
       editorStore.setActiveTool('select')
       break
+    case 'pan-tool':
+      editorStore.setActiveTool('pan')
+      break
     case 'add-shape-square':
       editorStore.setActiveTool('rect')
       break
@@ -115,22 +115,25 @@ function handleToolbarClick(item) {
     case 'add-shape-line':
       editorStore.setActiveTool('line')
       break
+    case 'reset-canvas':
+      editorStore.resetCanvas()
+      break
   }
 }
 
-// async function onOpen() {
-//   const result = await openDialog()
-//   if (result?.contents) {
-//     editorStore.loadFromXml(result.contents)
-//   }
-// }
+async function onOpen() {
+  const result = await openDialog()
+  if (result?.contents) {
+    editorStore.loadFromXml(result.contents)
+  }
+}
 
 async function onSave() {
   const xml = editorStore.exportXml()
   await saveDialog(xml)
 }
 
-const editToolbarButtons = [
+const leftToolbarButtons = computed(() => [
   {
     name: 'select-item',
     icon: 'eva-navigation-2-outline',
@@ -138,6 +141,7 @@ const editToolbarButtons = [
     tooltip: 'Select Item',
     isActive: editorStore.activeTool === 'select',
   },
+
   {
     name: 'add-shape-square',
     icon: 'mdi-square',
@@ -156,7 +160,60 @@ const editToolbarButtons = [
     tooltip: 'Add Line',
     isActive: editorStore.activeTool === 'line',
   },
-]
+  {
+    name: 'reset-canvas',
+    icon: 'eva-refresh-outline',
+    tooltip: 'Reset Canvas (400x400)',
+    isActive: false,
+  },
+])
+
+const rightToolbarButtons = computed(() => [
+  {
+    name: 'undo',
+    icon: 'eva-undo-outline',
+    tooltip: 'Undo',
+    isActive: false,
+  },
+  {
+    name: 'redo',
+    icon: 'eva-undo-outline',
+    tooltip: 'Redo',
+    iconFlip: true,
+    isActive: false,
+  },
+  {
+    name: 'import',
+    icon: 'eva-file-add-outline',
+    tooltip: 'Import SVG',
+    isActive: false,
+  },
+  {
+    name: 'save',
+    icon: 'eva-save-outline',
+    tooltip: 'Save',
+    isActive: false,
+  },
+  {
+    name: 'pan-tool',
+    icon: 'eva-move-outline',
+    tooltip: 'Pan Tool (Hand)',
+    isActive: editorStore.activeTool === 'pan',
+  },
+  // Toggle Sidebars
+  {
+    name: 'toggle-left',
+    icon: 'eva-menu-outline',
+    tooltip: 'Toggle Layers',
+    isActive: false,
+  },
+  {
+    name: 'toggle-right',
+    icon: 'eva-settings-outline',
+    tooltip: 'Toggle Inspector',
+    isActive: false,
+  },
+])
 </script>
 
 <style scoped>
