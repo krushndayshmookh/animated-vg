@@ -24,6 +24,7 @@ export const useEditorStore = defineStore('editor', {
     canvasWidth: 800,
     canvasHeight: 600,
   }),
+  persist: true,
   actions: {
     toggleSidebarLeft() {
       this.sidebarLeftOpen = !this.sidebarLeftOpen
