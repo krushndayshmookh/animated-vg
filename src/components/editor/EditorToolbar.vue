@@ -1,5 +1,5 @@
 <template>
-  <div :class="`absolute-${props.side}`">
+  <div :class="`absolute-${props.side}`" :style="postitionStyle">
     <q-card class="q-col-gutter-xs q-ma-sm" :class="props.direction">
       <div v-for="item in props.items" :key="item.name" class="col-auto q-pa-xs">
         <q-btn
@@ -59,6 +59,7 @@ const TOOLTIP_ANCHORS = {
   bottom: 'top middle',
 }
 
+const postitionStyle = props.side === 'bottom' ? 'bottom: 4px; position: absolute;' : ''
 /*
 
 interface Item {

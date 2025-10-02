@@ -4,16 +4,10 @@
     <div class="editor-layout">
       <!-- Left Sidebar -->
 
-
-
-
       <!-- Main Canvas Area -->
       <div class="canvas-area">
         <EditorCanvas :zoom="zoom" @zoom-in="zoomIn" @zoom-out="zoomOut" />
       </div>
-
-
-
     </div>
 
     <!-- Floating Toolbars (Overlay) -->
@@ -67,7 +61,6 @@ import { useEditorStore } from 'src/stores/editor-store.js'
 import { saveDialog } from 'src/services/fs-client'
 import EditorToolbar from 'src/components/editor/EditorToolbar.vue'
 import EditorCanvas from 'components/editor/EditorCanvas.vue'
-
 
 const editorStore = useEditorStore()
 
@@ -169,7 +162,7 @@ const editToolbarButtons = [
 <style scoped>
 .editor-page {
   position: relative;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 50px);
   overflow: hidden;
   padding: 0;
   margin: 0;
@@ -177,7 +170,7 @@ const editToolbarButtons = [
 
 .editor-layout {
   display: flex;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 50px);
   position: relative;
 }
 
