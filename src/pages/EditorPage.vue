@@ -1,9 +1,6 @@
 <template>
   <q-page class="editor-page" data-test="editor-page">
-    <!-- Main Editor Layout -->
     <div class="editor-layout">
-      <!-- Left Sidebar -->
-
       <!-- Main Canvas Area -->
       <div class="canvas-area">
         <EditorCanvas :zoom="zoom" @zoom-in="zoomIn" @zoom-out="zoomOut" />
@@ -20,31 +17,12 @@
         @toolbar-click="handleToolbarClick"
       />
 
-      <EditorToolbar
+      <!-- <EditorToolbar
         side="bottom"
         direction="row"
-        :items="[
-          { name: 'play', icon: 'eva-play-circle-outline', tooltip: 'Play', isActive: true },
-          { name: 'pause', icon: 'eva-pause-circle-outline', tooltip: 'Pause', isActive: true },
-          { name: 'stop', icon: 'eva-stop-circle-outline', tooltip: 'Stop' },
-          { name: 'add-frame', icon: 'eva-plus-circle-outline', tooltip: 'Add Frame' },
-        ]"
+        :items="bottomToolbar"
         @toolbar-click="handleToolbarClick"
-      />
-    </div>
-
-    <!-- Canvas Controls Overlay -->
-    <div class="canvas-controls-overlay">
-      <div class="canvas-info">
-        <span>Canvas: {{ editorStore.canvasWidth }} × {{ editorStore.canvasHeight }}</span>
-        <span>Zoom: {{ Math.round(zoom * 100) }}%</span>
-      </div>
-      <div class="zoom-controls">
-        <q-btn dense icon="remove" @click="zoomOut" />
-        <q-btn dense :label="`${Math.round(zoom * 100)}%`" @click="resetZoom" />
-        <q-btn dense icon="add" @click="zoomIn" />
-        <q-btn dense icon="fit_screen" @click="fitToView" />
-      </div>
+      /> -->
     </div>
   </q-page>
 </template>
@@ -74,12 +52,12 @@ function resetZoom() {
   zoom.value = 1
 }
 
-function fitToView() {
-  zoom.value = 1 // For now, just reset to 100%
-}
+// function fitToView() {
+//   zoom.value = 1 // For now, just reset to 100%
+// }
 
 function handleToolbarClick(item) {
-  console.log('Toolbar item clicked:', item)
+  console.log('Toolbar item clicked:', item.name)
 
   switch (item.name) {
     case 'toggle-left':
@@ -104,7 +82,8 @@ function handleToolbarClick(item) {
       editorStore.setActiveTool('select')
       break
     case 'pan-tool':
-      editorStore.setActiveTool('pan')
+      if (editorStore.activeTool === 'pan') editorStore.setActiveTool('')
+      else editorStore.setActiveTool('pan')
       break
     case 'add-shape-square':
       editorStore.setActiveTool('rect')
@@ -117,6 +96,15 @@ function handleToolbarClick(item) {
       break
     case 'reset-canvas':
       editorStore.resetCanvas()
+      break
+    case 'zoom-in':
+      zoomIn()
+      break
+    case 'zoom-out':
+      zoomOut()
+      break
+    case 'zoom-100':
+      resetZoom()
       break
   }
 }
@@ -141,7 +129,6 @@ const leftToolbarButtons = computed(() => [
     tooltip: 'Select Item',
     isActive: editorStore.activeTool === 'select',
   },
-
   {
     name: 'add-shape-square',
     icon: 'mdi-square',
@@ -202,6 +189,9 @@ const rightToolbarButtons = computed(() => [
   },
   // Toggle Sidebars
   {
+    name: 'separator',
+  },
+  {
     name: 'toggle-left',
     icon: 'eva-menu-outline',
     tooltip: 'Toggle Layers',
@@ -213,7 +203,41 @@ const rightToolbarButtons = computed(() => [
     tooltip: 'Toggle Inspector',
     isActive: false,
   },
+  {
+    name: 'separator',
+  },
+  // {
+  //   name: 'fit-to-view',
+  //   icon: 'eva-crop-outline',
+  //   tooltip: 'Fit to View (TODO)',
+  //   isActive: false,
+  // }
+  {
+    name: 'zoom-in',
+    icon: 'eva-plus-outline',
+    tooltip: 'Zoom In',
+    isActive: false,
+  },
+  {
+    name: 'zoom-100',
+    icon: 'eva-search-outline',
+    tooltip: 'Reset Zoom to 100%',
+    isActive: zoom.value === 1,
+  },
+  {
+    name: 'zoom-out',
+    icon: 'eva-minus-outline',
+    tooltip: 'Zoom Out',
+    isActive: false,
+  },
 ])
+
+// const bottomToolbar = computed(() => [
+//   { name: 'play', icon: 'eva-play-circle-outline', tooltip: 'Play', isActive: true },
+//   { name: 'pause', icon: 'eva-pause-circle-outline', tooltip: 'Pause', isActive: true },
+//   { name: 'stop', icon: 'eva-stop-circle-outline', tooltip: 'Stop' },
+//   { name: 'add-frame', icon: 'eva-plus-circle-outline', tooltip: 'Add Frame' },
+// ])
 </script>
 
 <style scoped>

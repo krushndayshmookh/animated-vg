@@ -45,21 +45,21 @@ export const useEditorStore = defineStore('editor', {
     },
 
     // Canvas settings
-    setCanvasSize(width, height) {
-      this.canvasWidth = Math.max(100, Math.min(10000, width))
-      this.canvasHeight = Math.max(100, Math.min(10000, height))
-      this.metadata.size = { w: this.canvasWidth, h: this.canvasHeight }
-      this.updateSvgViewBox()
-    },
+    // setCanvasSize(width, height) {
+    //   this.canvasWidth = Math.max(100, Math.min(10000, width))
+    //   this.canvasHeight = Math.max(100, Math.min(10000, height))
+    //   // this.metadata.size = { w: this.canvasWidth, h: this.canvasHeight }
+    //   // this.updateSvgViewBox()
+    // },
 
-    updateSvgViewBox() {
-      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
-      const svg = doc.documentElement
-      svg.setAttribute('viewBox', `0 0 ${this.canvasWidth} ${this.canvasHeight}`)
-      svg.setAttribute('width', this.canvasWidth)
-      svg.setAttribute('height', this.canvasHeight)
-      this.xml = new XMLSerializer().serializeToString(svg)
-    },
+    // updateSvgViewBox() {
+    //   const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+    //   const svg = doc.documentElement
+    //   svg.setAttribute('viewBox', `0 0 ${this.canvasWidth} ${this.canvasHeight}`)
+    //   svg.setAttribute('width', this.canvasWidth)
+    //   svg.setAttribute('height', this.canvasHeight)
+    //   this.xml = new XMLSerializer().serializeToString(svg)
+    // },
     _snap(n) {
       if (!this.snapEnabled) return n
       const s = this.snapSize || 10
@@ -71,7 +71,7 @@ export const useEditorStore = defineStore('editor', {
       this.xml = xml
       this.metadata = {
         title: metadata.title,
-        viewBox: `0 0 ${metadata.size.w} ${metadata.size.h}`,
+        viewBox: metadata.viewBox,
         size: { w: metadata.size.w, h: metadata.size.h },
       }
       // Update canvas size to match imported SVG dimensions

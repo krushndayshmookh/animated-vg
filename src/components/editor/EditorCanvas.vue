@@ -132,26 +132,29 @@ const scrollY = ref(0)
 
 // Computed styles
 const canvasWrapperStyle = computed(() => ({
-  width: `${canvasWidth.value * props.zoom}px`,
-  height: `${canvasHeight.value * props.zoom}px`,
+  width: `${canvasWidth.value * props.zoom }px`,
+  height: `${canvasHeight.value * props.zoom }px`,
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: `translate(calc(-50% + ${panX.value}px), calc(-50% + ${panY.value}px))`,
   transition: isPanning.value ? 'none' : 'transform 0.1s ease-out',
+  // border: '1px solid red',
 }))
 
 const canvasBackgroundStyle = computed(() => ({
-  width: `${canvasWidth.value * props.zoom}px`,
-  height: `${canvasHeight.value * props.zoom}px`,
+  width: `${canvasWidth.value * props.zoom }px`,
+  height: `${canvasHeight.value * props.zoom }px`,
   position: 'relative',
   background: '#f8f9fa',
-  border: '1px solid #e0e0e0',
+  // border: '10px solid #e0e0e0',
+  // boxSizing: 'border-box',
   cursor: isPanning.value
     ? 'grabbing'
     : spacePressed.value || store.activeTool === 'pan'
       ? 'grab'
       : 'default',
+  // border: '1px solid orange',
 }))
 
 const canvasBorderStyle = computed(() => ({
@@ -160,9 +163,11 @@ const canvasBorderStyle = computed(() => ({
   left: '0',
   width: `${canvasWidth.value * props.zoom}px`,
   height: `${canvasHeight.value * props.zoom}px`,
-  border: '2px solid #1976d2',
+  border: '1px solid #1976d2',
   pointerEvents: 'none',
   zIndex: 1,
+  // boxSizing: 'border-box',
+  // border: '1px solid blue',
 }))
 
 const svgContainerStyle = computed(() => ({
@@ -227,7 +232,8 @@ const svgContainerStyle = computed(() => ({
 
 function updateCanvasSize() {
   // Update SVG viewBox to match canvas dimensions
-  store.updateSvgViewBox()
+  // store.updateSvgViewBox()
+  console.log('updateCanvasSize')
 }
 
 // Coordinate conversion - commented out for simple canvas

@@ -30,8 +30,28 @@
     </div>
 
     <div class="q-mt-sm">
-      <q-btn dense color="primary" label="Apply" data-test="canvas-apply" @click="applySize" />
-      <q-btn dense flat label="Reset" data-test="canvas-reset" @click="resetSize" />
+      <q-btn
+        dense
+        color="primary"
+        label="Apply"
+        data-test="canvas-apply"
+        @click="
+          () => {
+            console.log('Apply canvas size:', width, height)
+          }
+        "
+      />
+      <q-btn
+        dense
+        flat
+        label="Reset"
+        data-test="canvas-reset"
+        @click="
+          () => {
+            console.log('Reset canvas size')
+          }
+        "
+      />
     </div>
 
     <div class="q-mt-sm">
@@ -79,26 +99,12 @@ watch(
   },
 )
 
-function updateSize() {
-  // Debounced update - only apply when user stops typing
-  clearTimeout(updateSize.timeout)
-  updateSize.timeout = setTimeout(() => {
-    applySize()
-  }, 500)
-}
-
-function applySize() {
-  store.setCanvasSize(width.value, height.value)
-}
-
-function resetSize() {
-  width.value = 800
-  height.value = 600
-  applySize()
-}
-
 function toggleGrid() {
   store.setShowGrid(showGrid.value)
+}
+
+function updateSize() {
+  console.log('TODO: updateSize')
 }
 </script>
 

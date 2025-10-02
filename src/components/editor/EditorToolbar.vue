@@ -2,7 +2,9 @@
   <div :class="`absolute-${props.side}`" :style="postitionStyle">
     <q-card class="q-col-gutter-xs q-ma-sm" :class="props.direction">
       <div v-for="item in props.items" :key="item.name" class="col-auto q-pa-xs">
+        <q-separator v-if="item.name === 'separator'"></q-separator>
         <q-btn
+          v-else
           :flat="!item.isActive"
           dense
           :icon="item.icon"
