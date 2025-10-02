@@ -2,6 +2,7 @@
   <LayoutDrawerApplet name="Layers">
     <!-- <pre>{{ json }}</pre> -->
     <q-tree
+      v-if="json"
       v-model:selected="selectedElement"
       :nodes="[json]"
       node-key="id"
