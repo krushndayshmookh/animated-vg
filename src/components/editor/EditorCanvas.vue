@@ -31,7 +31,7 @@
               @mousedown.stop="onSelectionMouseDown"
             />
 
-            <!-- Rubber Band -->
+            <!-- TODO: Implement Rubber Band -->
             <!-- <div
               v-if="rubberBand"
               class="rubber-outline"
@@ -134,7 +134,6 @@ const canvasWrapperStyle = computed(() => ({
   left: '50%',
   transform: `translate(calc(-50% + ${panX.value}px), calc(-50% + ${panY.value}px))`,
   transition: isPanning.value ? 'none' : 'transform 0.1s ease-out',
-  // border: '1px solid red',
 }))
 
 const canvasBackgroundStyle = computed(() => ({
@@ -142,14 +141,11 @@ const canvasBackgroundStyle = computed(() => ({
   height: `${canvasHeight.value * props.zoom}px`,
   position: 'relative',
   background: '#f8f9fa',
-  // border: '10px solid #e0e0e0',
-  // boxSizing: 'border-box',
   cursor: isPanning.value
     ? 'grabbing'
     : spacePressed.value || store.activeTool === 'pan'
       ? 'grab'
       : 'default',
-  // border: '1px solid orange',
 }))
 
 const canvasBorderStyle = computed(() => ({
@@ -161,8 +157,6 @@ const canvasBorderStyle = computed(() => ({
   border: '1px solid #1976d2',
   pointerEvents: 'none',
   zIndex: 1,
-  // boxSizing: 'border-box',
-  // border: '1px solid blue',
 }))
 
 const svgContainerStyle = computed(() => ({
@@ -221,7 +215,6 @@ const selectionStyle = computed(() => {
 //   }
 // })
 
-// Zoom functions are now handled by parent component
 
 // Coordinate conversion
 function toLocalCoords(evt) {

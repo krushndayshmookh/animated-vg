@@ -1,6 +1,5 @@
 <template>
   <LayoutDrawerApplet name="Layers">
-    <!-- <pre>{{ json }}</pre> -->
     <q-tree
       v-model:selected="selectedElement"
       :nodes="[json]"
@@ -44,8 +43,6 @@ function onTreeSelectionChange(nodeId) {
     editorStore.setSelectionById(nodeId)
   }
 }
-
-// json to be displayed in a tree view
 
 const ICONS = {
   svg: 'mdi-vector-square',

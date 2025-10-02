@@ -1,6 +1,6 @@
 <template>
   <div class="layout-drawer-bottom scroll">
-    <!-- placeholder --- IGNORE --- -->
+    <!-- placeholder --- TODO: Implement bottom drawer content --- -->
   </div>
 </template>
 

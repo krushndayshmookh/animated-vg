@@ -15,7 +15,8 @@ export const useEditorStore = defineStore('editor', {
     _idCounter: 1,
     undoStack: [],
     redoStack: [],
-    // M7 settings
+    
+    // Settings
     snapEnabled: false,
     snapSize: 10,
     showGrid: false,

@@ -1,7 +1,6 @@
 <template>
   <q-page class="editor-page" data-test="editor-page">
     <div class="editor-layout">
-      <!-- Main Canvas Area -->
       <div class="canvas-area">
         <EditorCanvas :zoom="zoom" @zoom-in="zoomIn" @zoom-out="zoomOut" />
       </div>
@@ -59,40 +58,42 @@ function resetZoom() {
 function handleToolbarClick(item) {
   console.info('Toolbar item clicked:', item.name)
 
+  if (editorStore.activeTool === item.name) {
+    editorStore.setActiveTool('')
+    console.info('Deactivated tool:', item.name)
+    return
+  }
+
   switch (item.name) {
-    case 'toggle-left':
-      editorStore.toggleSidebarLeft()
-      break
-    case 'toggle-right':
-      editorStore.toggleSidebarRight()
-      break
     case 'import':
       onOpen()
       break
     case 'undo':
-      // TODO: Implement undo
+      console.warn('TODO: Implement undo')
       break
     case 'redo':
-      // TODO: Implement redo
+      console.warn('TODO: Implement redo')
       break
     case 'save':
       onSave()
       break
-    case 'select-item':
+    case 'select':
       editorStore.setActiveTool('select')
       break
-    case 'pan-tool':
-      if (editorStore.activeTool === 'pan') editorStore.setActiveTool('')
-      else editorStore.setActiveTool('pan')
+    case 'pan':
+      editorStore.setActiveTool('pan')
       break
     case 'add-shape-square':
-      editorStore.setActiveTool('rect')
+      editorStore.setActiveTool('add-shape-square')
+      console.warn('TODO: Implement shape addition')
       break
     case 'add-shape-circle':
-      editorStore.setActiveTool('ellipse')
+      editorStore.setActiveTool('add-shape-circle')
+      console.warn('TODO: Implement shape addition')
       break
     case 'add-shape-line':
-      editorStore.setActiveTool('line')
+      editorStore.setActiveTool('add-shape-line')
+      console.warn('TODO: Implement shape addition')
       break
     case 'reset-canvas':
       editorStore.resetCanvas()
@@ -105,6 +106,13 @@ function handleToolbarClick(item) {
       break
     case 'zoom-100':
       resetZoom()
+      break
+    case 'fit-to-view':
+      console.warn('TODO: Implement fit to view')
+      // fitToView()
+      break
+    default:
+      console.warn('Unhandled toolbar action:', item.name)
       break
   }
 }
@@ -123,47 +131,46 @@ async function onSave() {
 
 const leftToolbarButtons = computed(() => [
   {
-    name: 'select-item',
+    name: 'select',
     icon: 'eva-navigation-2-outline',
     iconFlip: true,
     tooltip: 'Select Item',
     isActive: editorStore.activeTool === 'select',
   },
-  {
-    name: 'add-shape-square',
-    icon: 'mdi-square',
-    tooltip: 'Add Rectangle',
-    isActive: editorStore.activeTool === 'rect',
-  },
-  {
-    name: 'add-shape-circle',
-    icon: 'mdi-circle',
-    tooltip: 'Add Ellipse',
-    isActive: editorStore.activeTool === 'ellipse',
-  },
-  {
-    name: 'add-shape-line',
-    icon: 'eva-minus-outline',
-    tooltip: 'Add Line',
-    isActive: editorStore.activeTool === 'line',
-  },
-
+  // {
+  //   name: 'add-shape-square',
+  //   icon: 'mdi-square',
+  //   tooltip: 'Add Rectangle',
+  //   isActive: editorStore.activeTool === 'rect',
+  // },
+  // {
+  //   name: 'add-shape-circle',
+  //   icon: 'mdi-circle',
+  //   tooltip: 'Add Ellipse',
+  //   isActive: editorStore.activeTool === 'ellipse',
+  // },
+  // {
+  //   name: 'add-shape-line',
+  //   icon: 'eva-minus-outline',
+  //   tooltip: 'Add Line',
+  //   isActive: editorStore.activeTool === 'line',
+  // },
 ])
 
 const rightToolbarButtons = computed(() => [
-  {
-    name: 'undo',
-    icon: 'eva-undo-outline',
-    tooltip: 'Undo',
-    isActive: false,
-  },
-  {
-    name: 'redo',
-    icon: 'eva-undo-outline',
-    tooltip: 'Redo',
-    iconFlip: true,
-    isActive: false,
-  },
+  // {
+  //   name: 'undo',
+  //   icon: 'eva-undo-outline',
+  //   tooltip: 'Undo',
+  //   isActive: false,
+  // },
+  // {
+  //   name: 'redo',
+  //   icon: 'eva-undo-outline',
+  //   tooltip: 'Redo',
+  //   iconFlip: true,
+  //   isActive: false,
+  // },
   {
     name: 'import',
     icon: 'eva-file-add-outline',
@@ -176,34 +183,13 @@ const rightToolbarButtons = computed(() => [
     tooltip: 'Save',
     isActive: false,
   },
-   {
+  {
     name: 'reset-canvas',
     icon: 'eva-trash-outline',
     tooltip: 'Reset Canvas (400x400)',
     isActive: false,
   },
-  {
-    name: 'pan-tool',
-    icon: 'eva-move-outline',
-    tooltip: 'Pan Tool (Hand)',
-    isActive: editorStore.activeTool === 'pan',
-  },
-  // Toggle Sidebars
-  {
-    name: 'separator',
-  },
-  {
-    name: 'toggle-left',
-    icon: 'eva-menu-outline',
-    tooltip: 'Toggle Layers',
-    isActive: false,
-  },
-  {
-    name: 'toggle-right',
-    icon: 'eva-settings-outline',
-    tooltip: 'Toggle Inspector',
-    isActive: false,
-  },
+
   {
     name: 'separator',
   },
@@ -230,6 +216,12 @@ const rightToolbarButtons = computed(() => [
     icon: 'eva-minus-outline',
     tooltip: 'Zoom Out',
     isActive: false,
+  },
+  {
+    name: 'pan',
+    icon: 'eva-move-outline',
+    tooltip: 'Pan Tool (Hand)',
+    isActive: editorStore.activeTool === 'pan',
   },
 ])
 

@@ -1,4 +1,4 @@
-// Basic SVG helpers
+// SVG helpers
 
 export function importSvg(xml) {
   const doc = new DOMParser().parseFromString(xml, 'image/svg+xml')

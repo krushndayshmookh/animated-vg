@@ -2,15 +2,6 @@
   <q-layout view="hHh lpr lFr">
     <q-header elevated>
       <q-toolbar>
-        <!-- <q-btn
-          flat
-          round
-          dense
-          icon="eva-menu-outline"
-          data-test="toolbar-toggle-left"
-          @click="editorStore.toggleSidebarLeft"
-        /> -->
-
         <q-toolbar-title> AnimatedVG </q-toolbar-title>
 
         <LayoutButton

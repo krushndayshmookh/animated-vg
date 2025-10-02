@@ -1,6 +1,6 @@
 <template>
   <div class="fixed scroll fit">
-    <!-- placeholder --- IGNORE --- -->
+    <!-- placeholder --- TODO: Implement right drawer content --- -->
   </div>
 </template>
 
