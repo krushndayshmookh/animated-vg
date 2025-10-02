@@ -22,13 +22,14 @@
             <div v-html="safeSvgHtml"></div>
 
             <!-- Selection Outline -->
-            <!-- <div
+            <div
               v-if="selectionBox"
+              ref="selectionBoxElement"
               class="selection-outline"
               :style="selectionStyle"
               data-test="selection-outline"
               @mousedown.stop="onSelectionMouseDown"
-            /> -->
+            />
 
             <!-- Rubber Band -->
             <!-- <div
@@ -105,14 +106,8 @@ const canvasBackground = ref(null)
 const svgContainer = ref(null)
 
 // Canvas dimensions and zoom
-const canvasWidth = computed(() => {
-  console.log('Canvas width computed:', store.canvasWidth)
-  return store.canvasWidth
-})
-const canvasHeight = computed(() => {
-  console.log('Canvas height computed:', store.canvasHeight)
-  return store.canvasHeight
-})
+const canvasWidth = computed(() => store.canvasWidth)
+const canvasHeight = computed(() => store.canvasHeight)
 
 // Pan and zoom state
 const panX = ref(0)
@@ -132,8 +127,8 @@ const scrollY = ref(0)
 
 // Computed styles
 const canvasWrapperStyle = computed(() => ({
-  width: `${canvasWidth.value * props.zoom }px`,
-  height: `${canvasHeight.value * props.zoom }px`,
+  width: `${canvasWidth.value * props.zoom}px`,
+  height: `${canvasHeight.value * props.zoom}px`,
   position: 'absolute',
   top: '50%',
   left: '50%',
@@ -143,8 +138,8 @@ const canvasWrapperStyle = computed(() => ({
 }))
 
 const canvasBackgroundStyle = computed(() => ({
-  width: `${canvasWidth.value * props.zoom }px`,
-  height: `${canvasHeight.value * props.zoom }px`,
+  width: `${canvasWidth.value * props.zoom}px`,
+  height: `${canvasHeight.value * props.zoom}px`,
   position: 'relative',
   background: '#f8f9fa',
   // border: '10px solid #e0e0e0',
@@ -180,27 +175,25 @@ const svgContainerStyle = computed(() => ({
   zIndex: 2,
 }))
 
-// Commented out for simple canvas - no selection functionality
-// const selectionBox = computed(() => {
-//   if (!store.selectedId) return null
-//   const rect = store.getRectById(store.selectedId)
-//   return rect
-// })
+// Selection box computation
+const selectionBox = computed(() => (store.selectedId ? store.getBBoxById(store.selectedId) : null))
+const selectionBoxElement = ref(null)
 
-// Commented out for simple canvas
-// const selectionStyle = computed(() => {
-//   if (!selectionBox.value) return {}
-//   const { x, y, width, height } = selectionBox.value
-//   return {
-//     position: 'absolute',
-//     left: `${x * props.zoom}px`,
-//     top: `${y * props.zoom}px`,
-//     width: `${width * props.zoom}px`,
-//     height: `${height * props.zoom}px`,
-//     pointerEvents: 'auto',
-//     zIndex: 3,
-//   }
-// })
+// Selection style computation
+const selectionStyle = computed(() => {
+  if (!selectionBox.value) return {}
+  const { x, y, width, height } = selectionBox.value
+
+  return {
+    position: 'absolute',
+    left: `${x * props.zoom}px`,
+    top: `${y * props.zoom}px`,
+    width: `${width * props.zoom}px`,
+    height: `${height * props.zoom}px`,
+    pointerEvents: 'auto',
+    zIndex: 3,
+  }
+})
 
 // Commented out for simple canvas
 // const rubberBand = computed(() => {
@@ -230,22 +223,16 @@ const svgContainerStyle = computed(() => ({
 
 // Zoom functions are now handled by parent component
 
-function updateCanvasSize() {
-  // Update SVG viewBox to match canvas dimensions
-  // store.updateSvgViewBox()
-  console.log('updateCanvasSize')
+// Coordinate conversion
+function toLocalCoords(evt) {
+  const svgEl = svgContainer.value
+  if (!svgEl) return { x: 0, y: 0 }
+
+  const rect = svgEl.getBoundingClientRect()
+  const x = (evt.clientX - rect.left) / props.zoom
+  const y = (evt.clientY - rect.top) / props.zoom
+  return { x, y }
 }
-
-// Coordinate conversion - commented out for simple canvas
-// function toLocalCoords(evt) {
-//   const svgEl = svgContainer.value
-//   if (!svgEl) return { x: 0, y: 0 }
-
-//   const rect = svgEl.getBoundingClientRect()
-//   const x = (evt.clientX - rect.left) / props.zoom
-//   const y = (evt.clientY - rect.top) / props.zoom
-//   return { x, y }
-// }
 
 // Event handlers
 function onScroll() {
@@ -366,20 +353,22 @@ function onKeyUp(evt) {
   }
 }
 
-function onClick() {
-  // Commented out for simple canvas - no selection functionality
-  // if (store.activeTool !== 'select') return
-  // const p = toLocalCoords(evt)
-  // store.setSelectionByPoint(p.x, p.y)
+function onClick(evt) {
+  const p = toLocalCoords(evt)
+  const selectedId = store.setSelectionByPoint(p.x, p.y)
+
+  console.info('Canvas clicked, active tool:', store.activeTool, p)
+  if (selectedId) {
+    console.info('Selection result:', selectedId)
+  }
+
+  if (store.activeTool !== 'select') return
 }
 
-// Commented out for simple canvas - no selection functionality
-// function onSelectionMouseDown(evt) {
-//   if (store.activeTool !== 'select' || !selectionBox.value) return
-//   const p = toLocalCoords(evt)
-//   dragOffset.value = { dx: p.x - selectionBox.value.x, dy: p.y - selectionBox.value.y }
-//   draggingSelection.value = true
-// }
+function onSelectionMouseDown(evt) {
+  // Prevent the click from propagating to the canvas behind the selection
+  evt.stopPropagation()
+}
 
 // Watch for canvas dimension changes and reset pan position
 watch([canvasWidth, canvasHeight], () => {
@@ -395,12 +384,6 @@ let resizeObserver = null
 
 // Initialize canvas
 onMounted(() => {
-  updateCanvasSize()
-
-  // if(store.json) {
-  //   console.log('Initial JSON:', store.json)
-  // }
-
   // Set up resize observer
   if (scrollContainer.value) {
     resizeObserver = new ResizeObserver(() => {

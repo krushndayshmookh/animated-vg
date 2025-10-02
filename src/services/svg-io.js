@@ -5,12 +5,8 @@ export function importSvg(xml) {
   ensureIds(doc)
 
   const newXml = new XMLSerializer().serializeToString(doc) // re-serialize to clean up with ensured IDs
-
   const svg = doc.documentElement
-
-  // console.log('SVG root element:', svg)
   const json = domToJson(svg)
-  // console.log('Parsed SVG DOM:', dom)
 
   const title = (doc.querySelector('svg > title')?.textContent || '').trim()
   const viewBox = svg.getAttribute('viewBox') || '0 0 800 600'
@@ -31,7 +27,6 @@ export function importSvg(xml) {
     }
   }
 
-  // console.log('SVG dimensions extracted:', { w, h, viewBox, title })
   return {
     xml: newXml,
     svg,
@@ -51,7 +46,6 @@ export function sanitizeOnExport(svgEl) {
   const disallowedAttrs = [/^on.*/i]
   const walker = svgEl.ownerDocument.createTreeWalker(svgEl, NodeFilter.SHOW_ELEMENT)
   while (walker.nextNode()) {
-    console.log('Sanitizing element:', walker.currentNode.id || walker.currentNode.tagName)
     const el = walker.currentNode
     for (const attr of Array.from(el.attributes)) {
       if (disallowedAttrs.some((re) => re.test(attr.name))) {
@@ -63,11 +57,12 @@ export function sanitizeOnExport(svgEl) {
 }
 
 export function domToJson(node) {
-  const id =
-    node.id ||
-    (node.attributes && node.attributes.getNamedItem('id')?.value) ||
-    new Date().getTime().toString(36) + Math.random().toString(36).slice(2)
-  // console.log('Processing node:', node)
+  let id = node.id || (node.attributes && node.attributes.getNamedItem('id')?.value) || null
+
+  if (!id) {
+    id = 'id-' + new Date().getTime().toString(36) + Math.random().toString(36).slice(2)
+  }
+
   if (node.nodeType === Node.ELEMENT_NODE) {
     const obj = {
       id,

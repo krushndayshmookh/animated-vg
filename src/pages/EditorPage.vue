@@ -57,7 +57,7 @@ function resetZoom() {
 // }
 
 function handleToolbarClick(item) {
-  console.log('Toolbar item clicked:', item.name)
+  console.info('Toolbar item clicked:', item.name)
 
   switch (item.name) {
     case 'toggle-left':

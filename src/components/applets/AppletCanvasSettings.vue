@@ -37,7 +37,7 @@
         data-test="canvas-apply"
         @click="
           () => {
-            console.log('Apply canvas size:', width, height)
+            console.warn('TODO: Apply canvas size:', width, height)
           }
         "
       />
@@ -48,7 +48,7 @@
         data-test="canvas-reset"
         @click="
           () => {
-            console.log('Reset canvas size')
+            console.warn('TODO: Reset canvas size')
           }
         "
       />
@@ -104,7 +104,7 @@ function toggleGrid() {
 }
 
 function updateSize() {
-  console.log('TODO: updateSize')
+  console.warn('TODO: updateSize')
 }
 </script>
 

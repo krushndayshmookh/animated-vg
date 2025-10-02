@@ -2,12 +2,12 @@
   <LayoutDrawerApplet name="Layers">
     <!-- <pre>{{ json }}</pre> -->
     <q-tree
-      v-if="json"
       v-model:selected="selectedElement"
       :nodes="[json]"
       node-key="id"
       label-key="tagName"
       :expanded="[json.id]"
+      @update:selected="onTreeSelectionChange"
     >
       <template #default-header="prop">
         <q-icon :name="ICONS[prop.node.tagName]" class="q-mr-sm" />
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import LayoutDrawerApplet from 'components/layout/LayoutDrawerApplet.vue'
 import { useEditorStore } from 'src/stores/editor-store.js'
 
@@ -28,6 +28,23 @@ const editorStore = useEditorStore()
 const json = computed(() => editorStore.json)
 
 const selectedElement = ref(null)
+
+// Watch for changes in editor store selection and sync to tree
+watch(
+  () => editorStore.selectedId,
+  (newSelectedId) => {
+    selectedElement.value = newSelectedId
+  },
+  { immediate: true },
+)
+
+// Handle tree selection changes and update editor store
+function onTreeSelectionChange(nodeId) {
+  if (nodeId !== editorStore.selectedId) {
+    editorStore.setSelectionById(nodeId)
+  }
+}
+
 // json to be displayed in a tree view
 
 const ICONS = {

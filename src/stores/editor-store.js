@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { importSvg, exportSvg } from 'src/services/svg-io'
+import { importSvg, exportSvg, domToJson } from 'src/services/svg-io'
 
 export const useEditorStore = defineStore('editor', {
   state: () => ({
@@ -8,7 +8,7 @@ export const useEditorStore = defineStore('editor', {
     sidebarBottomOpen: false,
 
     xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"></svg>',
-    json: null,
+    json: { id: 'svg-root', tagName: 'svg', children: [] }, // Initialize with basic structure
     metadata: { title: '', viewBox: '0 0 400 400', size: { w: 400, h: 400 } },
     activeTool: 'select',
     selectedId: null,
@@ -79,14 +79,17 @@ export const useEditorStore = defineStore('editor', {
       // Update canvas size to match imported SVG dimensions
       this.canvasWidth = metadata.size.w
       this.canvasHeight = metadata.size.h
-      console.log('Updated canvas size:', this.canvasWidth, this.canvasHeight)
+      console.info('Updated canvas size:', this.canvasWidth, this.canvasHeight)
       this.undoStack = []
       this.redoStack = []
     },
+
     resetCanvas() {
       // Reset to 400x400 canvas with empty SVG
       this.xml =
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400"></svg>'
+      // Update json representation
+      this.json = this._updateJsonFromXml()
       this.metadata = {
         title: '',
         viewBox: '0 0 400 400',
@@ -97,7 +100,11 @@ export const useEditorStore = defineStore('editor', {
       this.selectedId = null
       this.undoStack = []
       this.redoStack = []
-      console.log('Canvas reset to 400x400')
+      console.info('Canvas reset to 400x400')
+    },
+    _updateJsonFromXml() {
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      return domToJson(doc.documentElement)
     },
     setActiveTool(tool) {
       this.activeTool = tool
@@ -141,6 +148,7 @@ export const useEditorStore = defineStore('editor', {
       rect.setAttribute('stroke-width', attrs.strokeWidth ? String(attrs.strokeWidth) : '1')
       svg.appendChild(rect)
       this.xml = new XMLSerializer().serializeToString(svg)
+      this.json = this._updateJsonFromXml()
       this.undoStack.push(before)
       this.redoStack = []
       return id
@@ -173,6 +181,7 @@ export const useEditorStore = defineStore('editor', {
       el.setAttribute('stroke-width', attrs.strokeWidth ? String(attrs.strokeWidth) : '1')
       svg.appendChild(el)
       this.xml = new XMLSerializer().serializeToString(svg)
+      this.json = this._updateJsonFromXml()
       this.undoStack.push(before)
       this.redoStack = []
       return id
@@ -197,6 +206,7 @@ export const useEditorStore = defineStore('editor', {
       el.setAttribute('fill', 'none')
       svg.appendChild(el)
       this.xml = new XMLSerializer().serializeToString(svg)
+      this.json = this._updateJsonFromXml()
       this.undoStack.push(before)
       this.redoStack = []
       return id
@@ -237,19 +247,38 @@ export const useEditorStore = defineStore('editor', {
     clearSelection() {
       this.selectedId = null
     },
-    setSelectionByPoint(px, py) {
+    setSelectionById(id) {
+      // Validate that the element exists in the rendered DOM first
+      const renderedElement = document.getElementById(id)
+      if (renderedElement) {
+        this.selectedId = id
+        return
+      }
+
+      // Fallback: check if element exists in XML
       const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
-      const svg = doc.documentElement
-      const candidates = Array.from(svg.children)
+      const el = doc.getElementById(id)
+      if (el) {
+        this.selectedId = id
+      }
+    },
+    setSelectionByPoint(px, py) {
+      // Try to find the element in the actual rendered DOM first
+      const svgElements = document.querySelectorAll('svg *[id]')
+
       let picked = null
-      for (const el of candidates) {
-        const tag = el.tagName
+      for (const el of svgElements) {
+        const tag = el.tagName.toLowerCase()
+
         if (tag === 'rect') {
           const x = parseFloat(el.getAttribute('x') || '0')
           const y = parseFloat(el.getAttribute('y') || '0')
           const w = parseFloat(el.getAttribute('width') || '0')
           const h = parseFloat(el.getAttribute('height') || '0')
-          if (px >= x && px <= x + w && py >= y && py <= y + h) picked = el.getAttribute('id')
+          if (px >= x && px <= x + w && py >= y && py <= y + h) {
+            picked = el.getAttribute('id')
+            break
+          }
         } else if (tag === 'ellipse') {
           const cx = parseFloat(el.getAttribute('cx') || '0')
           const cy = parseFloat(el.getAttribute('cy') || '0')
@@ -257,7 +286,10 @@ export const useEditorStore = defineStore('editor', {
           const ry = parseFloat(el.getAttribute('ry') || '0')
           const nx = (px - cx) / (rx || 1)
           const ny = (py - cy) / (ry || 1)
-          if (nx * nx + ny * ny <= 1) picked = el.getAttribute('id')
+          if (nx * nx + ny * ny <= 1) {
+            picked = el.getAttribute('id')
+            break
+          }
         } else if (tag === 'line') {
           const x1 = parseFloat(el.getAttribute('x1') || '0')
           const y1 = parseFloat(el.getAttribute('y1') || '0')
@@ -278,41 +310,55 @@ export const useEditorStore = defineStore('editor', {
             const dy = py - yy
             return Math.sqrt(dx * dx + dy * dy)
           })(px, py, x1, y1, x2, y2)
-          if (dist <= 3) picked = el.getAttribute('id')
+          if (dist <= 3) {
+            picked = el.getAttribute('id')
+            break
+          }
         }
       }
+
       this.selectedId = picked
       return picked
     },
     getBBoxById(id) {
-      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
-      const el = doc.getElementById(id)
-      if (!el) return null
-      if (el.tagName === 'rect') {
-        const x = parseFloat(el.getAttribute('x') || '0')
-        const y = parseFloat(el.getAttribute('y') || '0')
-        const width = parseFloat(el.getAttribute('width') || '0')
-        const height = parseFloat(el.getAttribute('height') || '0')
-        return { x, y, width, height }
+      // Try to find the element in the actual rendered DOM first
+      const renderedElement = document.getElementById(id)
+      if (renderedElement) {
+        const bbox = renderedElement.getBBox()
+
+        // Get the SVG element to understand the coordinate system
+        const svgElement = renderedElement.closest('svg')
+        if (svgElement) {
+          // Calculate the scale factor from viewBox to rendered size
+          const viewBox = svgElement.getAttribute('viewBox')
+          if (viewBox) {
+            const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(Number)
+
+            // Get the SVG's natural size (what it would be at zoom 1)
+            // This should match the canvas dimensions
+            const naturalWidth = this.canvasWidth
+            const naturalHeight = this.canvasHeight
+
+            // Transform coordinates from viewBox to natural (zoom=1) coordinate system
+            // This gives us coordinates that work with the zoom scaling in the UI
+            const scaleX = naturalWidth / vbWidth
+            const scaleY = naturalHeight / vbHeight
+
+            // Transform coordinates from viewBox to natural coordinate system
+            const transformedBBox = {
+              x: bbox.x * scaleX,
+              y: bbox.y * scaleY,
+              width: bbox.width * scaleX,
+              height: bbox.height * scaleY,
+            }
+
+            return transformedBBox
+          }
+        }
+
+        return { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height }
       }
-      if (el.tagName === 'ellipse') {
-        const cx = parseFloat(el.getAttribute('cx') || '0')
-        const cy = parseFloat(el.getAttribute('cy') || '0')
-        const rx = parseFloat(el.getAttribute('rx') || '0')
-        const ry = parseFloat(el.getAttribute('ry') || '0')
-        return { x: cx - rx, y: cy - ry, width: rx * 2, height: ry * 2 }
-      }
-      if (el.tagName === 'line') {
-        const x1 = parseFloat(el.getAttribute('x1') || '0')
-        const y1 = parseFloat(el.getAttribute('y1') || '0')
-        const x2 = parseFloat(el.getAttribute('x2') || '0')
-        const y2 = parseFloat(el.getAttribute('y2') || '0')
-        const x = Math.min(x1, x2)
-        const y = Math.min(y1, y2)
-        const width = Math.abs(x2 - x1)
-        const height = Math.abs(y2 - y1)
-        return { x, y, width, height }
-      }
+
       return null
     },
     getRectById(id) {
