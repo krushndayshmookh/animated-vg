@@ -1,5 +1,8 @@
 <template>
   <q-page class="editor-page" data-test="editor-page">
+    <!-- Add the pattern definitions -->
+    <EditorBackgroundPatterns />
+    
     <div class="editor-layout">
       <div class="canvas-area">
         <EditorCanvas :zoom="zoom" @zoom-in="zoomIn" @zoom-out="zoomOut" />
@@ -23,6 +26,9 @@
         @toolbar-click="handleToolbarClick"
       /> -->
     </div>
+    
+    <!-- Add the right drawer with background settings -->
+    <LayoutDrawerRight />
   </q-page>
 </template>
 
@@ -32,6 +38,8 @@ import { useEditorStore } from 'src/stores/editor-store.js'
 import { saveDialog, openDialog } from 'src/services/fs-client'
 import EditorToolbar from 'src/components/editor/EditorToolbar.vue'
 import EditorCanvas from 'components/editor/EditorCanvas.vue'
+import EditorBackgroundPatterns from '../components/editor/EditorBackgroundPatterns.vue'
+import LayoutDrawerRight from '../components/layout/LayoutDrawerRight.vue'
 
 const editorStore = useEditorStore()
 
