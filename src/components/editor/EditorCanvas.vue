@@ -4,7 +4,11 @@
     <div ref="scrollContainer" class="canvas-scroll-area" @scroll="onScroll" @wheel="onWheel">
       <div ref="canvasWrapper" class="canvas-wrapper" :style="canvasWrapperStyle">
         <!-- Canvas Background -->
-        <div ref="canvasBackground" class="canvas-background" :style="canvasBackgroundStyle">
+        <div 
+          ref="canvasBackground" 
+          class="canvas-background" 
+          :style="canvasBackgroundStyle"
+        >
           <!-- Canvas Border -->
           <div class="canvas-border" :style="canvasBorderStyle"></div>
 
@@ -136,16 +140,50 @@ const canvasWrapperStyle = computed(() => ({
   transition: isPanning.value ? 'none' : 'transform 0.1s ease-out',
 }))
 
-const canvasBackgroundStyle = computed(() => ({
-  width: `${canvasWidth.value * props.zoom}px`,
-  height: `${canvasHeight.value * props.zoom}px`,
-  position: 'relative',
-  background: '#f8f9fa',
-  cursor: isPanning.value
-    ? 'grabbing'
-    : spacePressed.value || store.activeTool === 'pan'
-      ? 'grab'
-      : 'default',
+// Background related computations
+const backgroundFill = computed(() => {
+  const bg = store.canvasBackground
+  
+  switch(bg.type) {
+    case 'color':
+      return bg.color
+    case 'pattern':
+      return bg.pattern ? `url(#${bg.pattern})` : '#ffffff'
+    case 'image':
+      return 'transparent' // Let the background image CSS handle this
+    default:
+      return '#ffffff'
+  }
+})
+
+const canvasBackgroundStyle = computed(() => {
+  const bgSettings = store.canvasBackground
+  const baseStyles = {
+    width: `${canvasWidth.value * props.zoom}px`,
+    height: `${canvasHeight.value * props.zoom}px`,
+    position: 'relative',
+    cursor: isPanning.value
+      ? 'grabbing'
+      : spacePressed.value || store.activeTool === 'pan'
+        ? 'grab'
+        : 'default',
+    opacity: `${bgSettings.opacity / 100}`,
+  }
+
+  if (bgSettings.type === 'color') {
+    baseStyles.background = bgSettings.color
+  } else if (bgSettings.type === 'pattern' && bgSettings.pattern) {
+    // We'll use SVG patterns defined elsewhere and referenced via #id
+    baseStyles.background = `#f8f9fa`
+  } else if (bgSettings.type === 'image' && bgSettings.image) {
+    baseStyles.backgroundImage = `url(${bgSettings.image})`
+    baseStyles.backgroundSize = 'cover'
+    baseStyles.backgroundPosition = 'center'
+  } else {
+    baseStyles.background = '#f8f9fa'
+  }
+  
+  return baseStyles
 }))
 
 const canvasBorderStyle = computed(() => ({
@@ -188,33 +226,6 @@ const selectionStyle = computed(() => {
     zIndex: 3,
   }
 })
-
-// Commented out for simple canvas
-// const rubberBand = computed(() => {
-//   if (!drawing.value) return null
-//   const x = Math.min(start.value.x, current.value.x)
-//   const y = Math.min(start.value.y, current.value.y)
-//   const w = Math.abs(current.value.x - start.value.x)
-//   const h = Math.abs(current.value.y - start.value.y)
-//   if (w < 2 || h < 2) return null
-//   return { x, y, width: w, height: h }
-// })
-
-// Commented out for simple canvas
-// const rubberStyle = computed(() => {
-//   if (!rubberBand.value) return {}
-//   const { x, y, width, height } = rubberBand.value
-//   return {
-//     position: 'absolute',
-//     left: `${x * props.zoom}px`,
-//     top: `${y * props.zoom}px`,
-//     width: `${width * props.zoom}px`,
-//     height: `${height * props.zoom}px`,
-//     pointerEvents: 'none',
-//     zIndex: 3,
-//   }
-// })
-
 
 // Coordinate conversion
 function toLocalCoords(evt) {

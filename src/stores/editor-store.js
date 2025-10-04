@@ -24,6 +24,15 @@ export const useEditorStore = defineStore('editor', {
     // Canvas settings
     canvasWidth: 400,
     canvasHeight: 400,
+    
+    // Canvas background settings
+    canvasBackground: {
+      type: 'color', // 'color', 'pattern', or 'image'
+      color: '#ffffff', // default white
+      pattern: null, // pattern id
+      image: null, // image data URL
+      opacity: 100 // percentage
+    }
   }),
   persist: true,
   actions: {
@@ -661,5 +670,12 @@ export const useEditorStore = defineStore('editor', {
       this.undoStack.push(before)
       this.redoStack = []
     },
+    // Canvas background
+    updateCanvasBackground(backgroundOptions) {
+      this.canvasBackground = {
+        ...this.canvasBackground,
+        ...backgroundOptions
+      }
+    }
   },
 })
