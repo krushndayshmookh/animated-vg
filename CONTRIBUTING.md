@@ -1,20 +1,16 @@
 # Contributing to AnimatedVG
 
-Thanks for your interest in contributing! This guide covers local setup, coding standards, and how to propose changes.
+Thank you for your interest in contributing! This guide will help you get started.
 
-## Code of Conduct
+## Getting Started
 
-By participating in this project, you agree to uphold a respectful, inclusive environment. If a separate CODE_OF_CONDUCT is added later, it will be referenced here.
-
-## Getting started
-
-Prerequisites
+### Prerequisites
 
 - Node.js 18+
-- npm (preferred) or yarn
-- For desktop dev: Rust toolchain (for Tauri) and platform SDKs if you plan to run native builds
+- npm (recommended)
+- For desktop development: Rust toolchain (Tauri only)
 
-Clone and install
+### Setup
 
 ```bash
 git clone https://github.com/krushndayshmookh/animated-vg.git
@@ -22,57 +18,42 @@ cd animated-vg
 npm install
 ```
 
-Useful scripts
+### Development Commands
 
 ```bash
-npm run dev            # web dev server
-npm test               # unit/component tests
-npm run test:watch     # watch mode
-npm run e2e:install    # playwright browsers
-npm run e2e            # e2e tests
-npm run lint           # eslint
-npm run format         # prettier write
-npm run build          # production build
-npm run electron:smoke # Electron smoke run
+npm run dev            # Start development server
+npm test               # Run tests
+npm run lint           # Check code style
+npm run format         # Format code
+npm run build          # Production build
 ```
 
-## Development workflow
+## Guidelines
 
-- Tests first when possible; keep the suite green (Vitest + Playwright).
-- Keep SVG as the single source of truth; avoid hidden state.
-- Prefer minimal, focused PRs with clear descriptions and screenshots or GIFs when UI changes.
-- Add or update tests for any user-facing change or bug fix.
-- Update docs (README/PLAN) when public behavior or scope changes.
+### Code Standards
 
-## Coding standards
+- Use Vue 3 Composition API and follow existing patterns
+- Run `npm run lint` and `npm run format` before committing
+- Write tests for new features and bug fixes
+- Keep commits focused and write clear commit messages
+- Prefer [eva icons](https://akveo.github.io/eva-icons/) for UI icons and fallback to [mdi](https://materialdesignicons.com/) if needed
 
-- JavaScript/Vue 3 with Composition API; follow existing patterns.
-- ESLint + Prettier are configured. Run `npm run lint` and `npm run format` before pushing.
-- Avoid introducing new dependencies unless necessary; prefer small, well-maintained libraries.
+### Pull Request Process
 
-## Commit style
+1. Fork the repository and create a feature branch (`git checkout -b feat/my-feature`)
+2. Make your changes with appropriate tests
+3. Ensure all tests and linting pass
+4. Submit a pull request with a clear description
 
-- Use clear, imperative commit messages (e.g., "Add snapping to moveSelectedTo").
-- Reference issues where relevant (e.g., "Fixes #123").
+### Reporting Issues
 
-## Pull requests
+When reporting bugs, please include:
 
-1. Fork the repo and create a feature branch: `git checkout -b feat/short-description`
-2. Make your changes with tests and docs.
-3. Ensure linters and tests pass locally.
-4. Push your branch and open a PR against `main` with a clear description.
-5. Be responsive to review comments; keep changes scoped.
-
-## Issue reports
-
-- Use the provided issue templates if available.
-- Include steps to reproduce, expected vs actual behavior, and environment details.
-- For bugs, attach minimal SVG samples when possible.
-
-## Security
-
-If you discover a security issue, please do not open a public issue. Instead, email the maintainer listed in `package.json`.
+- Steps to reproduce the issue
+- Expected vs actual behavior
+- Your environment details
+- Sample SVG files if relevant
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project’s LICENSE (MIT unless otherwise stated).
+By contributing, you agree that your contributions will be licensed under the MIT License.
