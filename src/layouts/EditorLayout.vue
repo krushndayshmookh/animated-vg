@@ -6,6 +6,13 @@
 
         <LayoutButton
           :active="editorStore.sidebarLeftOpen"
+          icon="eva-moon-outline"
+          data-test="toolbar-toggle-darkMode"
+          @click="editorStore.toggleDarkMode"
+        />
+
+        <LayoutButton
+          :active="editorStore.sidebarLeftOpen"
           icon="eva-arrowhead-left-outline"
           data-test="toolbar-toggle-left"
           @click="editorStore.toggleSidebarLeft"
