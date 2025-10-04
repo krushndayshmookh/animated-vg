@@ -12,6 +12,15 @@
         <q-icon :name="ICONS[prop.node.tagName]" class="q-mr-sm" />
 
         <span>{{ prop.node.id }}</span>
+        <q-btn
+          v-if="prop.node.id !== 'svg-root' && (!prop.node.children || prop.node.children.length === 0)"
+          dense
+          flat
+          round
+          icon="mdi-delete"
+          class="q-ml-auto"
+          @click.stop="deleteNode(prop.node.id)"
+        />
       </template>
     </q-tree>
   </LayoutDrawerApplet>
@@ -21,6 +30,7 @@
 import { computed, ref, watch } from 'vue'
 import LayoutDrawerApplet from 'components/layout/LayoutDrawerApplet.vue'
 import { useEditorStore } from 'src/stores/editor-store.js'
+import { QBtn } from 'quasar'
 
 const editorStore = useEditorStore()
 
@@ -42,6 +52,12 @@ function onTreeSelectionChange(nodeId) {
   if (nodeId !== editorStore.selectedId) {
     editorStore.setSelectionById(nodeId)
   }
+}
+
+const deleteNode = (id) => {
+  if (id === 'svg-root') return
+  editorStore.setSelectionById(id)
+  editorStore.deleteSelected()
 }
 
 const ICONS = {

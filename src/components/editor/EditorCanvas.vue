@@ -332,6 +332,9 @@ function onKeyDown(evt) {
   if (evt.code === 'Space' && !spacePressed.value) {
     evt.preventDefault()
     spacePressed.value = true
+  } else if (evt.key === 'Delete' && store.selectedId) {
+    evt.preventDefault()
+    store.deleteSelected()
   }
 }
 

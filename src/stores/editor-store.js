@@ -476,6 +476,21 @@ export const useEditorStore = defineStore('editor', {
       const svg = doc.documentElement
       this.xml = new XMLSerializer().serializeToString(svg)
     },
+
+    deleteSelected() {
+      if (!this.selectedId) return
+      const before = this.xml
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const el = doc.getElementById(this.selectedId)
+      if (!el || el === doc.documentElement) return // Don't delete root SVG
+      const parent = el.parentNode
+      parent.removeChild(el)
+      this.xml = new XMLSerializer().serializeToString(doc.documentElement)
+      this.json = this._updateJsonFromXml()
+      this.clearSelection()
+      this.undoStack.push(before)
+      this.redoStack = []
+    },
     // Grouping
     groupSelected() {
       if (!this.selectedId) return null
