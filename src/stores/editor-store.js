@@ -6,6 +6,7 @@ export const useEditorStore = defineStore('editor', {
     sidebarLeftOpen: false,
     sidebarRightOpen: false,
     sidebarBottomOpen: false,
+    darkMode: false,
 
     xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"></svg>',
     json: { id: 'svg-root', tagName: 'svg', children: [] }, // Initialize with basic structure
@@ -15,7 +16,7 @@ export const useEditorStore = defineStore('editor', {
     _idCounter: 1,
     undoStack: [],
     redoStack: [],
-    
+
     // Settings
     snapEnabled: false,
     snapSize: 10,
@@ -35,6 +36,9 @@ export const useEditorStore = defineStore('editor', {
     },
     toggleSidebarBottom() {
       this.sidebarBottomOpen = !this.sidebarBottomOpen
+    },
+    toggleDarkMode() {
+      this.darkMode = !this.darkMode;
     },
 
     // Settings

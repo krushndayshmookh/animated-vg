@@ -425,6 +425,12 @@ onUnmounted(() => {
     10px 10px;
 }
 
+.body--dark {
+  .canvas-scroll-area {
+    background: #23272a;
+  }
+}
+
 .canvas-scroll-area:active {
   cursor: grabbing;
 }
