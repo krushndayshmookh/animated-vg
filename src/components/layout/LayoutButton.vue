@@ -32,6 +32,4 @@ defineProps({
 defineEmits(['click'])
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

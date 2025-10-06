@@ -15,7 +15,7 @@ export const useEditorStore = defineStore('editor', {
     _idCounter: 1,
     undoStack: [],
     redoStack: [],
-    
+
     // Settings
     snapEnabled: false,
     snapSize: 10,
@@ -24,6 +24,9 @@ export const useEditorStore = defineStore('editor', {
     // Canvas settings
     canvasWidth: 400,
     canvasHeight: 400,
+    // Custom tools and user presets
+    customTools: [], // { id, name, handler? (optional metadata) }
+    presets: [], // { id, name, tool, config }
   }),
   persist: true,
   actions: {
@@ -109,6 +112,105 @@ export const useEditorStore = defineStore('editor', {
     },
     setActiveTool(tool) {
       this.activeTool = tool
+    },
+    // Preset management: save/apply/delete/import/export user presets
+    _findPresetById(id) {
+      return this.presets.find((p) => p.id === id) || null
+    },
+    _findCustomToolById(id) {
+      return this.customTools.find((t) => t.id === id) || null
+    },
+    savePreset({ id = null, name, tool, config = {} } = {}) {
+      if (!name || !tool) throw new Error('Preset must have a name and a tool')
+      if (id) {
+        const idx = this.presets.findIndex((p) => p.id === id)
+        if (idx >= 0) {
+          this.presets.splice(idx, 1, { id, name, tool, config })
+          return id
+        }
+      }
+      const newId = `preset-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+      this.presets.push({ id: newId, name, tool, config })
+      return newId
+    },
+    applyPreset(id) {
+      const p = this._findPresetById(id)
+      if (!p) return false
+      // Apply tool selection
+      this.setActiveTool(p.tool)
+      // Apply simple config keys to store where reasonable (e.g., snap, grid, metadata)
+      if (p.config) {
+        if (typeof p.config.snapEnabled !== 'undefined') this.snapEnabled = !!p.config.snapEnabled
+        if (typeof p.config.snapSize !== 'undefined') this.snapSize = p.config.snapSize
+        if (typeof p.config.showGrid !== 'undefined') this.showGrid = !!p.config.showGrid
+        if (p.config.title) this.setTitle(p.config.title)
+      }
+      return true
+    },
+    deletePreset(id) {
+      const idx = this.presets.findIndex((p) => p.id === id)
+      if (idx >= 0) {
+        this.presets.splice(idx, 1)
+        return true
+      }
+      return false
+    },
+    // Custom tools management
+    saveCustomTool({ id = null, name, icon = null, meta = {} } = {}) {
+      if (!name) throw new Error('Custom tool must have a name')
+      if (id) {
+        const idx = this.customTools.findIndex((t) => t.id === id)
+        if (idx >= 0) {
+          this.customTools.splice(idx, 1, { id, name, icon, meta })
+          return id
+        }
+      }
+      const newId = `tool-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+      this.customTools.push({ id: newId, name, icon, meta })
+      return newId
+    },
+    deleteCustomTool(id) {
+      const idx = this.customTools.findIndex((t) => t.id === id)
+      if (idx >= 0) {
+        this.customTools.splice(idx, 1)
+        return true
+      }
+      return false
+    },
+    exportPresets() {
+      try {
+        return JSON.stringify({ presets: this.presets, customTools: this.customTools }, null, 2)
+      } catch {
+        return '[]'
+      }
+    },
+    importPresets(jsonString) {
+      try {
+        const parsed = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString
+        if (Array.isArray(parsed.presets)) {
+          // Merge while avoiding ID collisions: if id exists replace, else add
+          for (const p of parsed.presets) {
+            if (!p.id)
+              p.id = `preset-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+            const existing = this.presets.findIndex((x) => x.id === p.id)
+            if (existing >= 0) this.presets.splice(existing, 1, p)
+            else this.presets.push(p)
+          }
+        }
+        if (Array.isArray(parsed.customTools)) {
+          for (const t of parsed.customTools) {
+            if (!t.id)
+              t.id = `tool-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+            const existing = this.customTools.findIndex((x) => x.id === t.id)
+            if (existing >= 0) this.customTools.splice(existing, 1, t)
+            else this.customTools.push(t)
+          }
+        }
+        return true
+      } catch (e) {
+        console.error('Failed to import presets', e)
+        return false
+      }
     },
     setTitle(title) {
       this.metadata.title = title

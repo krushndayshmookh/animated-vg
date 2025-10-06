@@ -46,21 +46,41 @@ export async function openDialog() {
   })
 }
 
-export async function saveDialog(xml) {
-  if (hasElectron()) return window.electronAPI.save(xml)
+export async function saveDialog(
+  contents,
+  { defaultName = 'document.svg', mime = 'image/svg+xml' } = {},
+) {
+  // contents: string
+  if (hasElectron()) {
+    // Electron bridge may handle save dialog; pass contents as-is. If the bridge supports a filename
+    // it should be updated to accept it. Keep backwards-compatible single-arg call.
+    try {
+      const res = await window.electronAPI.save(contents)
+      return res
+    } catch (err) {
+      // Fall through to other methods if electronAPI.save fails
+      console.warn('electronAPI.save failed, falling back to other save methods', err)
+    }
+  }
+
   const tauri = await getTauriApis()
   if (tauri) {
-    const savePath = await tauri.dialog.save({ filters: [{ name: 'SVG', extensions: ['svg'] }] })
+    const savePath = await tauri.dialog.save({
+      filters: [{ name: 'All Files', extensions: ['*'] }],
+      defaultPath: defaultName,
+    })
     if (!savePath) return null
-    await tauri.fs.writeTextFile(savePath, xml)
+    await tauri.fs.writeTextFile(savePath, contents)
     return { path: savePath }
   }
-  // web fallback: trigger download
-  const blob = new Blob([xml], { type: 'image/svg+xml' })
+
+  // web fallback: trigger download with the provided filename and mime
+  const blob = new Blob([contents], { type: mime || 'application/octet-stream' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = 'document.svg'
+  a.download = defaultName || 'download.bin'
   a.click()
-  URL.revokeObjectURL(a.href)
-  return { path: 'document.svg' }
+  // revoke after a tick to avoid issues on some browsers
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000)
+  return { path: defaultName || 'download.bin' }
 }

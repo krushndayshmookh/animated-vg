@@ -16,6 +16,8 @@
         @toolbar-click="handleToolbarClick"
       />
 
+      <ToolPresetsManager v-model="showPresets" />
+
       <!-- <EditorToolbar
         side="bottom"
         direction="row"
@@ -32,6 +34,7 @@ import { useEditorStore } from 'src/stores/editor-store.js'
 import { saveDialog, openDialog } from 'src/services/fs-client'
 import EditorToolbar from 'src/components/editor/EditorToolbar.vue'
 import EditorCanvas from 'components/editor/EditorCanvas.vue'
+import ToolPresetsManager from 'src/components/editor/ToolPresetsManager.vue'
 
 const editorStore = useEditorStore()
 
@@ -76,6 +79,9 @@ function handleToolbarClick(item) {
       break
     case 'save':
       onSave()
+      break
+    case 'presets':
+      showPresets.value = true
       break
     case 'select':
       editorStore.setActiveTool('select')
@@ -126,7 +132,10 @@ async function onOpen() {
 
 async function onSave() {
   const xml = editorStore.exportXml()
-  await saveDialog(xml)
+  await saveDialog(xml, {
+    defaultName: (editorStore.metadata.title || 'document') + '.svg',
+    mime: 'image/svg+xml',
+  })
 }
 
 const leftToolbarButtons = computed(() => [
@@ -178,6 +187,12 @@ const rightToolbarButtons = computed(() => [
     isActive: false,
   },
   {
+    name: 'presets',
+    icon: 'eva-bookmark-outline',
+    tooltip: 'Tool Presets',
+    isActive: false,
+  },
+  {
     name: 'save',
     icon: 'eva-save-outline',
     tooltip: 'Save',
@@ -224,6 +239,8 @@ const rightToolbarButtons = computed(() => [
     isActive: editorStore.activeTool === 'pan',
   },
 ])
+
+const showPresets = ref(false)
 
 // const bottomToolbar = computed(() => [
 //   { name: 'play', icon: 'eva-play-circle-outline', tooltip: 'Play', isActive: true },

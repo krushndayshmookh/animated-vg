@@ -1,5 +1,3 @@
-
-
 ## CI/CD (GitHub Pages)
 
 This repo includes a GitHub Actions workflow that builds the app and deploys to GitHub Pages on pushes to `main` or `master`.
@@ -10,8 +8,8 @@ This repo includes a GitHub Actions workflow that builds the app and deploys to 
 
 To enable Pages:
 
-1) In the repo settings, enable GitHub Pages and choose “GitHub Actions” as the source.
-2) Push to `main` (or `master`) to trigger a deploy.
+1. In the repo settings, enable GitHub Pages and choose “GitHub Actions” as the source.
+2. Push to `main` (or `master`) to trigger a deploy.
 
 Desktop notes
 

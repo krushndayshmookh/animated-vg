@@ -215,7 +215,6 @@ const selectionStyle = computed(() => {
 //   }
 // })
 
-
 // Coordinate conversion
 function toLocalCoords(evt) {
   const svgEl = svgContainer.value
