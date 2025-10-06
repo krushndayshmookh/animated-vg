@@ -12,6 +12,8 @@
             transform: item.iconFlip ? 'scaleX(-1)' : 'none',
           }"
           :color="item.isActive ? 'primary' : 'default'"
+          :disable="item.disabled"
+          :data-test="`toolbar-item-${item.name}`"
           @click="handleItemClick(item)"
         >
           <q-tooltip v-if="item.tooltip" :anchor="TOOLTIP_ANCHORS[props.side]">

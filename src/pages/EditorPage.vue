@@ -2,7 +2,13 @@
   <q-page class="editor-page" data-test="editor-page">
     <div class="editor-layout">
       <div class="canvas-area">
-        <EditorCanvas :zoom="zoom" @zoom-in="zoomIn" @zoom-out="zoomOut" />
+        <EditorCanvas
+          ref="canvasRef"
+          :zoom="zoom"
+          @zoom-in="zoomIn"
+          @zoom-out="zoomOut"
+          @zoom-to-selection="handleZoomToSelection"
+        />
       </div>
     </div>
 
@@ -38,20 +44,79 @@ import ToolPresetsManager from 'src/components/editor/ToolPresetsManager.vue'
 
 const editorStore = useEditorStore()
 
+// Canvas reference
+const canvasRef = ref(null)
+
 // Zoom state
 const zoom = ref(1)
 
 // Zoom functions
 function zoomIn() {
-  zoom.value = Math.min(zoom.value * 1.2, 10)
+  zoom.value = Math.min(zoom.value * 1.2, 100) // Increased max zoom to 100x
+
+  // If element is selected, re-center it after zoom
+  if (editorStore.selectedId && canvasRef.value) {
+    requestAnimationFrame(() => {
+      canvasRef.value?.recenterSelection()
+    })
+  }
 }
 
 function zoomOut() {
-  zoom.value = Math.max(zoom.value / 1.2, 0.1)
+  zoom.value = Math.max(zoom.value / 1.2, 0.01) // Decreased min zoom to 0.01x
+
+  // If element is selected, re-center it after zoom
+  if (editorStore.selectedId && canvasRef.value) {
+    requestAnimationFrame(() => {
+      canvasRef.value?.recenterSelection()
+    })
+  }
 }
 
 function resetZoom() {
   zoom.value = 1
+}
+
+function handleZoomToSelection(targetZoom) {
+  console.info('Setting zoom to:', targetZoom, 'current zoom:', zoom.value)
+  zoom.value = targetZoom
+  console.info('Zoom updated to:', zoom.value)
+}
+
+function zoomToSelection() {
+  console.info('zoomToSelection called, selectedId:', editorStore.selectedId)
+  if (!editorStore.selectedId) {
+    console.warn('No element selected to zoom to')
+    return
+  }
+  if (canvasRef.value) {
+    console.info('Calling canvas zoomToSelection method')
+    canvasRef.value.zoomToSelection()
+  } else {
+    console.warn('Canvas ref not available')
+  }
+}
+
+// Zoom in on selected element (increase zoom and recenter)
+function zoomInSelection() {
+  if (!editorStore.selectedId) return
+  zoom.value = Math.min(zoom.value * 1.5, 100) // Zoom in faster for selection
+  if (canvasRef.value) {
+    requestAnimationFrame(() => {
+      canvasRef.value?.recenterSelection()
+    })
+  }
+}
+
+// Zoom out on selected element (decrease zoom and recenter)
+function zoomOutSelection() {
+  if (!editorStore.selectedId) return
+  zoom.value = Math.max(zoom.value / 1.5, 0.01) // Zoom out faster for selection
+  if (canvasRef.value) {
+    requestAnimationFrame(() => {
+      canvasRef.value?.recenterSelection()
+    })
+  }
 }
 
 // function fitToView() {
@@ -59,7 +124,7 @@ function resetZoom() {
 // }
 
 function handleToolbarClick(item) {
-  console.info('Toolbar item clicked:', item.name)
+  console.info('Toolbar item clicked:', item.name, 'disabled:', item.disabled)
 
   if (editorStore.activeTool === item.name) {
     editorStore.setActiveTool('')
@@ -116,6 +181,15 @@ function handleToolbarClick(item) {
     case 'fit-to-view':
       console.warn('TODO: Implement fit to view')
       // fitToView()
+      break
+    case 'zoom-to-selection':
+      zoomToSelection()
+      break
+    case 'zoom-in-selection':
+      zoomInSelection()
+      break
+    case 'zoom-out-selection':
+      zoomOutSelection()
       break
     default:
       console.warn('Unhandled toolbar action:', item.name)
@@ -208,16 +282,34 @@ const rightToolbarButtons = computed(() => [
   {
     name: 'separator',
   },
-  // {
-  //   name: 'fit-to-view',
-  //   icon: 'eva-crop-outline',
-  //   tooltip: 'Fit to View (TODO)',
-  //   isActive: false,
-  // }
+  {
+    name: 'zoom-to-selection',
+    icon: 'eva-maximize-outline',
+    tooltip: 'Zoom to Selection',
+    isActive: false,
+    disabled: !editorStore.selectedId,
+  },
+  {
+    name: 'zoom-in-selection',
+    icon: 'eva-arrow-up-outline',
+    tooltip: 'Zoom In on Selection',
+    isActive: false,
+    disabled: !editorStore.selectedId,
+  },
+  {
+    name: 'zoom-out-selection',
+    icon: 'eva-arrow-down-outline',
+    tooltip: 'Zoom Out on Selection',
+    isActive: false,
+    disabled: !editorStore.selectedId,
+  },
+  {
+    name: 'separator',
+  },
   {
     name: 'zoom-in',
     icon: 'eva-plus-outline',
-    tooltip: 'Zoom In',
+    tooltip: 'Zoom In (Canvas)',
     isActive: false,
   },
   {

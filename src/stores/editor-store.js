@@ -7,7 +7,7 @@ export const useEditorStore = defineStore('editor', {
     sidebarRightOpen: false,
     sidebarBottomOpen: false,
 
-    xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"></svg>',
+    xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400"></svg>',
     json: { id: 'svg-root', tagName: 'svg', children: [] }, // Initialize with basic structure
     metadata: { title: '', viewBox: '0 0 400 400', size: { w: 400, h: 400 } },
     activeTool: 'select',
@@ -84,6 +84,17 @@ export const useEditorStore = defineStore('editor', {
       this.canvasWidth = metadata.size.w
       this.canvasHeight = metadata.size.h
       console.info('Updated canvas size:', this.canvasWidth, this.canvasHeight)
+
+      // Ensure all imported elements have IDs for selection to work
+      const doc = new DOMParser().parseFromString(this.xml, 'image/svg+xml')
+      const changed = this._ensureElementIds(doc)
+      if (changed) {
+        this.xml = new XMLSerializer().serializeToString(doc.documentElement)
+        console.info('✅ Added IDs to imported elements - selection should now work!')
+      } else {
+        console.info('ℹ️ All imported elements already have IDs')
+      }
+
       this.undoStack = []
       this.redoStack = []
     },
@@ -369,6 +380,15 @@ export const useEditorStore = defineStore('editor', {
       // Try to find the element in the actual rendered DOM first
       const svgElements = document.querySelectorAll('svg *[id]')
 
+      console.log(
+        `🔍 Checking ${svgElements.length} elements at point (${px.toFixed(2)}, ${py.toFixed(2)})`,
+      )
+
+      // Log all elements found
+      svgElements.forEach((el) => {
+        console.log(`  Found element: <${el.tagName.toLowerCase()}> id="${el.getAttribute('id')}"`)
+      })
+
       let picked = null
       for (const el of svgElements) {
         const tag = el.tagName.toLowerCase()
@@ -378,7 +398,19 @@ export const useEditorStore = defineStore('editor', {
           const y = parseFloat(el.getAttribute('y') || '0')
           const w = parseFloat(el.getAttribute('width') || '0')
           const h = parseFloat(el.getAttribute('height') || '0')
+          console.log(`  Checking rect ${el.getAttribute('id')}: x=${x}, y=${y}, w=${w}, h=${h}`)
           if (px >= x && px <= x + w && py >= y && py <= y + h) {
+            picked = el.getAttribute('id')
+            console.log(`  ✅ HIT! Selected: ${picked}`)
+            break
+          }
+        } else if (tag === 'circle') {
+          const cx = parseFloat(el.getAttribute('cx') || '0')
+          const cy = parseFloat(el.getAttribute('cy') || '0')
+          const r = parseFloat(el.getAttribute('r') || '0')
+          const dx = px - cx
+          const dy = py - cy
+          if (dx * dx + dy * dy <= r * r) {
             picked = el.getAttribute('id')
             break
           }
@@ -416,6 +448,25 @@ export const useEditorStore = defineStore('editor', {
           if (dist <= 3) {
             picked = el.getAttribute('id')
             break
+          }
+        } else if (tag === 'path' || tag === 'polygon' || tag === 'polyline') {
+          // For path elements, use getBBox() to get bounding box
+          try {
+            const bbox = el.getBBox()
+            const x = bbox.x
+            const y = bbox.y
+            const w = bbox.width
+            const h = bbox.height
+            console.log(
+              `  Checking ${tag} ${el.getAttribute('id')}: bbox x=${x.toFixed(2)}, y=${y.toFixed(2)}, w=${w.toFixed(2)}, h=${h.toFixed(2)}`,
+            )
+            if (px >= x && px <= x + w && py >= y && py <= y + h) {
+              picked = el.getAttribute('id')
+              console.log(`  ✅ HIT! Selected: ${picked}`)
+              break
+            }
+          } catch (e) {
+            console.warn(`Could not get bbox for ${tag}:`, e)
           }
         }
       }
@@ -698,14 +749,37 @@ export const useEditorStore = defineStore('editor', {
     _ensureElementIds(doc) {
       let changed = false
       const svg = doc.documentElement
-      for (const el of Array.from(svg.children)) {
-        if (!el.getAttribute) continue
-        if (!el.getAttribute('id')) {
-          const id = this._genId(el.tagName.toLowerCase())
-          el.setAttribute('id', id)
-          changed = true
+
+      // Recursively add IDs to all elements, not just direct children
+      const addIdsRecursively = (element) => {
+        for (const el of Array.from(element.children)) {
+          if (!el.getAttribute) continue
+
+          // Skip <title>, <desc>, <defs>, and animation elements
+          const tagName = el.tagName.toLowerCase()
+          if (
+            ['title', 'desc', 'defs', 'animate', 'animateTransform', 'animateMotion'].includes(
+              tagName,
+            )
+          ) {
+            continue
+          }
+
+          if (!el.getAttribute('id')) {
+            const id = this._genId(tagName)
+            el.setAttribute('id', id)
+            changed = true
+            console.log(`Added ID "${id}" to <${tagName}>`)
+          }
+
+          // Recursively process children
+          if (el.children.length > 0) {
+            addIdsRecursively(el)
+          }
         }
       }
+
+      addIdsRecursively(svg)
       return changed
     },
     listAnimations(filterTargetId = null) {

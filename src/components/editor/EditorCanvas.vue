@@ -57,7 +57,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['zoom-in', 'zoom-out'])
+const emit = defineEmits(['zoom-in', 'zoom-out', 'zoom-to-selection'])
 
 const store = useEditorStore()
 
@@ -220,10 +220,31 @@ function toLocalCoords(evt) {
   const svgEl = svgContainer.value
   if (!svgEl) return { x: 0, y: 0 }
 
-  const rect = svgEl.getBoundingClientRect()
-  const x = (evt.clientX - rect.left) / props.zoom
-  const y = (evt.clientY - rect.top) / props.zoom
-  return { x, y }
+  // Get the actual SVG element (not the container div)
+  const actualSvg = svgEl.querySelector('svg')
+  if (!actualSvg) {
+    // Fallback to old method if no SVG found
+    const rect = svgEl.getBoundingClientRect()
+    const x = (evt.clientX - rect.left) / props.zoom
+    const y = (evt.clientY - rect.top) / props.zoom
+    return { x, y }
+  }
+
+  // Use SVG's built-in coordinate transformation
+  const pt = actualSvg.createSVGPoint()
+  pt.x = evt.clientX
+  pt.y = evt.clientY
+
+  try {
+    const svgP = pt.matrixTransform(actualSvg.getScreenCTM().inverse())
+    return { x: svgP.x, y: svgP.y }
+  } catch {
+    // Fallback if transformation fails
+    const rect = svgEl.getBoundingClientRect()
+    const x = (evt.clientX - rect.left) / props.zoom
+    const y = (evt.clientY - rect.top) / props.zoom
+    return { x, y }
+  }
 }
 
 // Event handlers
@@ -326,11 +347,102 @@ function stopPanning() {
   document.removeEventListener('mouseup', onDocumentMouseUp)
 }
 
-// Keyboard event handlers for spacebar panning
+// Keyboard event handlers for spacebar panning and arrow key movement
 function onKeyDown(evt) {
   if (evt.code === 'Space' && !spacePressed.value) {
     evt.preventDefault()
     spacePressed.value = true
+    return
+  }
+
+  // Arrow key movement for selected elements
+  if (store.selectedId && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(evt.code)) {
+    evt.preventDefault()
+
+    // Get current element attributes
+    const attrs = store.getSelectedAttrs()
+    if (!attrs) return
+
+    // Movement step: 1px normal, 10px with Shift
+    const step = evt.shiftKey ? 10 : 1
+
+    // Calculate new position based on element type
+    if (attrs.tag === 'rect') {
+      const newAttrs = { ...attrs }
+      if (evt.code === 'ArrowLeft') newAttrs.x -= step
+      if (evt.code === 'ArrowRight') newAttrs.x += step
+      if (evt.code === 'ArrowUp') newAttrs.y -= step
+      if (evt.code === 'ArrowDown') newAttrs.y += step
+      store.setSelectedAttrs(newAttrs)
+    } else if (attrs.tag === 'ellipse') {
+      const newAttrs = { ...attrs }
+      if (evt.code === 'ArrowLeft') newAttrs.cx -= step
+      if (evt.code === 'ArrowRight') newAttrs.cx += step
+      if (evt.code === 'ArrowUp') newAttrs.cy -= step
+      if (evt.code === 'ArrowDown') newAttrs.cy += step
+      store.setSelectedAttrs(newAttrs)
+    } else if (attrs.tag === 'line') {
+      const newAttrs = { ...attrs }
+      if (evt.code === 'ArrowLeft') {
+        newAttrs.x1 -= step
+        newAttrs.x2 -= step
+      }
+      if (evt.code === 'ArrowRight') {
+        newAttrs.x1 += step
+        newAttrs.x2 += step
+      }
+      if (evt.code === 'ArrowUp') {
+        newAttrs.y1 -= step
+        newAttrs.y2 -= step
+      }
+      if (evt.code === 'ArrowDown') {
+        newAttrs.y1 += step
+        newAttrs.y2 += step
+      }
+      store.setSelectedAttrs(newAttrs)
+    } else if (attrs.tag === 'path' || attrs.tag === 'polygon' || attrs.tag === 'polyline') {
+      // For path elements, use transform to move them
+      const el = document.getElementById(store.selectedId)
+      if (el) {
+        let dx = 0
+        let dy = 0
+        if (evt.code === 'ArrowLeft') dx = -step
+        if (evt.code === 'ArrowRight') dx = step
+        if (evt.code === 'ArrowUp') dy = -step
+        if (evt.code === 'ArrowDown') dy = step
+
+        // Get current transform or create new one
+        const currentTransform = el.getAttribute('transform') || ''
+        const translateMatch = currentTransform.match(/translate\(([^,]+),\s*([^)]+)\)/)
+
+        let currentX = 0
+        let currentY = 0
+        if (translateMatch) {
+          currentX = parseFloat(translateMatch[1]) || 0
+          currentY = parseFloat(translateMatch[2]) || 0
+        }
+
+        const newX = currentX + dx
+        const newY = currentY + dy
+
+        // Update transform
+        const newTransform =
+          currentTransform.replace(/translate\([^)]+\)/, '').trim() + ` translate(${newX}, ${newY})`
+        el.setAttribute('transform', newTransform.trim())
+
+        // Update the store's XML
+        const doc = new DOMParser().parseFromString(store.xml, 'image/svg+xml')
+        const xmlEl = doc.getElementById(store.selectedId)
+        if (xmlEl) {
+          xmlEl.setAttribute('transform', newTransform.trim())
+          store.xml = new XMLSerializer().serializeToString(doc.documentElement)
+        }
+      }
+    }
+
+    console.info(
+      `Moved element ${evt.shiftKey ? '10px' : '1px'} ${evt.code.replace('Arrow', '').toLowerCase()}`,
+    )
   }
 }
 
@@ -351,7 +463,9 @@ function onClick(evt) {
 
   console.info('Canvas clicked, active tool:', store.activeTool, p)
   if (selectedId) {
-    console.info('Selection result:', selectedId)
+    console.info('✅ Selection result:', selectedId)
+  } else {
+    console.info('❌ No element found at click position')
   }
 
   if (store.activeTool !== 'select') return
@@ -361,6 +475,112 @@ function onSelectionMouseDown(evt) {
   // Prevent the click from propagating to the canvas behind the selection
   evt.stopPropagation()
 }
+
+// Zoom to selection function
+function zoomToSelection() {
+  if (!store.selectedId) {
+    console.warn('No element selected to zoom to')
+    return false
+  }
+
+  const bbox = store.getBBoxById(store.selectedId)
+  console.info('Zoom to selection - BBox:', bbox)
+
+  if (!bbox || bbox.width === 0 || bbox.height === 0) {
+    console.warn('Cannot zoom to selection: invalid bounding box', bbox)
+    return false
+  }
+
+  const container = scrollContainer.value
+  if (!container) {
+    console.warn('No scroll container found')
+    return false
+  }
+
+  const containerRect = container.getBoundingClientRect()
+  const containerWidth = containerRect.width
+  const containerHeight = containerRect.height
+
+  console.info('Container dimensions:', { containerWidth, containerHeight })
+
+  // Add padding around the selection (20% of container size)
+  const padding = 0.2
+  const paddingX = containerWidth * padding
+  const paddingY = containerHeight * padding
+
+  // Calculate zoom level to fit the selection with padding
+  const zoomX = (containerWidth - paddingX * 2) / bbox.width
+  const zoomY = (containerHeight - paddingY * 2) / bbox.height
+  const targetZoom = Math.min(zoomX, zoomY, 100) // Cap at max zoom of 100x
+  const finalZoom = Math.max(targetZoom, 0.01) // Ensure minimum zoom of 0.01x
+
+  console.info('Calculated zoom:', { zoomX, zoomY, targetZoom, finalZoom })
+
+  // Calculate the center of the selection in canvas coordinates
+  const selectionCenterX = bbox.x + bbox.width / 2
+  const selectionCenterY = bbox.y + bbox.height / 2
+
+  console.info('Selection center:', { selectionCenterX, selectionCenterY })
+
+  // Emit event to parent to update zoom
+  emit('zoom-to-selection', finalZoom)
+
+  // Wait for zoom to be applied, then adjust pan to center the selection
+  nextTick(() => {
+    // The canvas is already centered at 50%, so we need to calculate offset from center
+    // Canvas center in SVG coordinates
+    const canvasCenterX = canvasWidth.value / 2
+    const canvasCenterY = canvasHeight.value / 2
+
+    // Offset from canvas center to selection center
+    const offsetX = selectionCenterX - canvasCenterX
+    const offsetY = selectionCenterY - canvasCenterY
+
+    // Pan is the negative of this offset (scaled by zoom)
+    panX.value = -offsetX * finalZoom
+    panY.value = -offsetY * finalZoom
+
+    console.info('Pan adjusted:', { panX: panX.value, panY: panY.value, offsetX, offsetY })
+  })
+
+  return true
+}
+
+// Recenter selection after zoom change
+function recenterSelection() {
+  if (!store.selectedId) return
+
+  const bbox = store.getBBoxById(store.selectedId)
+  if (!bbox) return
+
+  // Calculate the center of the selection in SVG coordinates
+  const selectionCenterX = bbox.x + bbox.width / 2
+  const selectionCenterY = bbox.y + bbox.height / 2
+
+  // The canvas is already centered at 50%, so we calculate offset from center
+  const canvasCenterX = canvasWidth.value / 2
+  const canvasCenterY = canvasHeight.value / 2
+
+  // Offset from canvas center to selection center
+  const offsetX = selectionCenterX - canvasCenterX
+  const offsetY = selectionCenterY - canvasCenterY
+
+  // Pan is the negative of this offset (scaled by current zoom)
+  panX.value = -offsetX * props.zoom
+  panY.value = -offsetY * props.zoom
+
+  console.info('Recentered selection after zoom change:', {
+    zoom: props.zoom,
+    panX: panX.value,
+    panY: panY.value,
+  })
+}
+
+// Expose methods to parent component
+defineExpose({
+  zoomToSelection,
+  recenterSelection,
+})
 
 // Watch for canvas dimension changes and reset pan position
 watch([canvasWidth, canvasHeight], () => {
