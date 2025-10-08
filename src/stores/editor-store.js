@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
-import { importSvg, exportSvg, domToJson } from 'src/services/svg-io'
+import { domToJson, exportSvg, importSvg } from 'src/services/svg-io'
 
 export const useEditorStore = defineStore('editor', {
   state: () => ({
     sidebarLeftOpen: false,
     sidebarRightOpen: false,
     sidebarBottomOpen: false,
+    darkMode: false,
 
     xml: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"></svg>',
     json: { id: 'svg-root', tagName: 'svg', children: [] }, // Initialize with basic structure
@@ -35,6 +36,9 @@ export const useEditorStore = defineStore('editor', {
     },
     toggleSidebarBottom() {
       this.sidebarBottomOpen = !this.sidebarBottomOpen
+    },
+    toggleDarkMode() {
+      this.darkMode = !this.darkMode
     },
 
     // Settings

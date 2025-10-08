@@ -5,6 +5,13 @@
         <q-toolbar-title> AnimatedVG </q-toolbar-title>
 
         <LayoutButton
+          :active="editorStore.darkMode"
+          icon="eva-moon-outline"
+          data-test="toolbar-toggle-darkMode"
+          @click="editorStore.toggleDarkMode"
+        />
+
+        <LayoutButton
           :active="editorStore.sidebarLeftOpen"
           icon="eva-arrowhead-left-outline"
           data-test="toolbar-toggle-left"
