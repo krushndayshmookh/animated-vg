@@ -10,6 +10,7 @@
           flat
           round
           :icon="isVisible ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+          :aria-label="(isVisible ? 'Collapse' : 'Expand') + ' ' + name + ' applet'"
           @click="toggle"
         />
       </q-item-section>
