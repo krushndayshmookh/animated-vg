@@ -8,6 +8,7 @@
           :flat="!item.isActive"
           dense
           :icon="item.icon"
+          :aria-label="item.tooltip || item.name"
           :style="{
             transform: item.iconFlip ? 'scaleX(-1)' : 'none',
           }"

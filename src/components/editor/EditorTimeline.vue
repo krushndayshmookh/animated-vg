@@ -30,6 +30,7 @@
           :data-test="'timeline-anim-from-' + row.animIndex"
           type="text"
           placeholder="from"
+          aria-label="From value"
         />
         <input
           v-model="edits[idKey(row)].to"
@@ -37,6 +38,7 @@
           :data-test="'timeline-anim-to-' + row.animIndex"
           type="text"
           placeholder="to"
+          aria-label="To value"
         />
         <input
           v-model="edits[idKey(row)].dur"
@@ -44,6 +46,7 @@
           :data-test="'timeline-anim-dur-' + row.animIndex"
           type="text"
           placeholder="dur"
+          aria-label="Duration"
         />
         <q-btn
           dense

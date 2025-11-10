@@ -18,6 +18,7 @@
           flat
           round
           icon="eva-more-vertical"
+          :aria-label="'Open actions for ' + (prop.node.id || prop.node.tagName)"
           class="q-ml-auto"
           :disable="prop.node.id === 'svg-root'"
         >

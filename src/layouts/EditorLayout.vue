@@ -7,6 +7,7 @@
         <LayoutButton
           :active="editorStore.sidebarLeftOpen"
           icon="eva-arrowhead-left-outline"
+          aria-label="Toggle left panel"
           data-test="toolbar-toggle-left"
           @click="editorStore.toggleSidebarLeft"
         />
@@ -14,6 +15,7 @@
         <LayoutButton
           :active="editorStore.sidebarRightOpen"
           icon="eva-arrowhead-right-outline"
+          aria-label="Toggle right panel"
           data-test="toolbar-toggle-right"
           @click="editorStore.toggleSidebarRight"
         />
@@ -21,6 +23,7 @@
         <LayoutButton
           :active="editorStore.sidebarBottomOpen"
           icon="eva-arrowhead-down-outline"
+          aria-label="Toggle bottom panel"
           data-test="toolbar-toggle-bottom"
           @click="editorStore.toggleSidebarBottom"
         />

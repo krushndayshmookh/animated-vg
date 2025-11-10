@@ -7,6 +7,7 @@
     :color="active ? 'white' : ''"
     :text-color="active ? 'primary' : ''"
     :icon="icon"
+    :aria-label="ariaLabel || icon"
     :data-test="dataTest"
     class="q-mx-xs"
     @click="$emit('click')"
@@ -27,11 +28,13 @@ defineProps({
     type: String,
     default: '',
   },
+  ariaLabel: {
+    type: String,
+    default: '',
+  },
 })
 
 defineEmits(['click'])
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
